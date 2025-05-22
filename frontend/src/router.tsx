@@ -1,25 +1,57 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import GuestLayout from "./components/GuestLayout";
-import SignupPage from "./pages/SignupPage";
+import AuthenticatedLayout from "./components/AuthenticatedLayout";
+import HomePage from "./pages/HomePage";
+import NewDocument from "./pages/NewDocument";
+import CreateUser from "./pages/CreateUser";
+import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
+import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
+import RequireSuperUser from "./components/RequireSuperUser";
 
-const router = createBrowserRouter(
-    [
-        {
-            path:'/',
-            element: <GuestLayout />,
-            children:[
-                {
-                    path:'/login',
-                    element: <LoginPage />
-                },
-                {
-                    path:'/signup',
-                    element: <SignupPage />
-                },
-            ] 
-        }
-    ]
-);
+
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <GuestLayout />,
+    children: [
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        index: true,
+        element: <Navigate to="/login" />,
+      },
+    ],
+  },
+  {
+    path: "/app",
+    element: <AuthenticatedLayout />, // Requires user to be logged in
+    children: [
+      {
+        path: "home-page",
+        element: <HomePage />,
+      },
+      {
+        path: "new-document",
+        element: <NewDocument />,
+      },
+      {
+        path: "edit-document",
+        element: <EditDocumentIndex />,
+      },
+      {
+        path: "authenticate-document",
+        element: <AuthenticateDocumentIndex />,
+      },
+      {
+        path: "create-user", // accesible only by super user
+        element: <RequireSuperUser><CreateUser /></RequireSuperUser>, //to do RequireSuperUser
+      },
+    ],
+  },
+]);
 
 export default router;

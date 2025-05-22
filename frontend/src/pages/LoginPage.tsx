@@ -1,14 +1,14 @@
 export default function LoginPage(): React.ReactElement{
     return (
         <>
-        <h2 className="mt-2 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
+        <h2 className="text-center text-2xl/9 font-bold tracking-tight text-gray-900">
             Sign in to your account
         </h2>
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form action="#" method="POST" className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                Email address
+                Staff email
               </label>
               <div className="mt-2">
                 <input
@@ -54,7 +54,6 @@ export default function LoginPage(): React.ReactElement{
               </button>
             </div>
           </form>
-
           <p className="mt-10 text-center text-sm/6 text-gray-500">
             Not a member?{' '}
             <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
