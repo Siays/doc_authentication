@@ -1,6 +1,4 @@
-from sqlalchemy import Column, String, Date, Boolean, Enum as SqlEnum
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
+from sqlalchemy import Column, String, Date, Boolean, Enum as SqlEnum, BigInteger
 import enum
 from db.database import Base
 
@@ -12,7 +10,7 @@ class GenderEnum(str, enum.Enum):
 class Staff(Base):
     __tablename__ = "staff"
 
-    staff_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    staff_id = Column(BigInteger, primary_key=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     ic_no = Column(String(20), nullable=False)

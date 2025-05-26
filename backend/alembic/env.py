@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Import all models here
 from db.database import Base
 from db.models import DocumentRecord
-from extra.db.model_staff import Staff
+from extra.db.models.model_staff import Staff
 
 # Load environment variables
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

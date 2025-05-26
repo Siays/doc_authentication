@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 import sys
 import os
@@ -8,11 +7,11 @@ from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from db.database import SessionLocal
-from extra.db.model_staff import Staff, GenderEnum
+from extra.db.models.model_staff import Staff, GenderEnum
 
 mock_staff_data = [
     {
-        "staff_id": "d3e1a731-1234-4567-b890-abcd12345678",
+        "staff_id": 1,
         "first_name": "Alice",
         "last_name": "Tan",
         "ic_no": "901231-14-5678",
@@ -23,7 +22,7 @@ mock_staff_data = [
         "is_active": True
     },
     {
-        "staff_id": "b9f219dc-2345-5678-c901-def456789012",
+        "staff_id": 2,
         "first_name": "Mohd",
         "last_name": "Ali",
         "ic_no": "850415-10-1234",
@@ -34,7 +33,7 @@ mock_staff_data = [
         "is_active": False
     },
     {
-        "staff_id": "a7e3bd59-4567-7890-d123-aaaa99998888",
+        "staff_id": 3,
         "first_name": "Liyana",
         "last_name": "Kamal",
         "ic_no": "950210-08-4567",
@@ -43,8 +42,53 @@ mock_staff_data = [
         "gender": GenderEnum.female,
         "job_title": "Finance Executive",
         "is_active": True
+    },
+    {
+        "staff_id": 4,
+        "first_name": "Zulkifli",
+        "last_name": "Hassan",
+        "ic_no": "820301-05-6789",
+        "email": "zulkifli.hassan@example.com",
+        "date_of_birth": "1982-03-01",
+        "gender": GenderEnum.male,
+        "job_title": "Operations Manager",
+        "is_active": True
+    },
+    {
+        "staff_id": 5,
+        "first_name": "Siti",
+        "last_name": "Rahmah",
+        "ic_no": "920712-03-4567",
+        "email": "siti.rahmah@example.com",
+        "date_of_birth": "1992-07-12",
+        "gender": GenderEnum.female,
+        "job_title": "Customer Service Officer",
+        "is_active": True
+    },
+    {
+        "staff_id": 6,
+        "first_name": "Jason",
+        "last_name": "Lim",
+        "ic_no": "870911-12-3456",
+        "email": "jason.lim@example.com",
+        "date_of_birth": "1987-09-11",
+        "gender": GenderEnum.male,
+        "job_title": "Software Engineer",
+        "is_active": True
+    },
+    {
+        "staff_id": 7,
+        "first_name": "Nurul",
+        "last_name": "Amirah",
+        "ic_no": "931025-09-2345",
+        "email": "nurul.amirah@example.com",
+        "date_of_birth": "1993-10-25",
+        "gender": GenderEnum.female,
+        "job_title": "QA Analyst",
+        "is_active": True
     }
 ]
+
 
 def seed():
     db = SessionLocal()
@@ -57,7 +101,7 @@ def seed():
             print(f"[DEBUG] Inserting staff: {data['email']}, gender: {data['gender']}")
 
             staff = Staff(
-                staff_id=uuid.UUID(data["staff_id"]),
+                staff_id=data["staff_id"],
                 first_name=data["first_name"],
                 last_name=data["last_name"],
                 ic_no=data["ic_no"],
