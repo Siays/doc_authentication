@@ -8,7 +8,7 @@ export default function GuestLayout() {
           <img
             alt="Your Company"
             src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-            className="h-20 w-auto mb-6"
+            className="h-15 w-auto mb-4"
           />
         </div>
         <Outlet />
