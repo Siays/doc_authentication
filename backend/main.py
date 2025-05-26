@@ -11,9 +11,10 @@ from qr_implementation.qr_processing import embed_qr_to_pdf, create_qr_url
 from sqlalchemy.orm import Session
 from uuid import UUID
 from db.database import get_db
-from db.models import Credential
+from db.models import DocumentRecord
 from crypto.crypto import RSAKeyPair
 from crypto.url_processing import encrypt_doc_id, decrypt_doc_id
+from db.crud import create, get
 
 app = FastAPI(title="PDF Upload & QR Embedding API")
 app.mount("/static", StaticFiles(directory="uploads/with_qr"), name="static")
@@ -83,19 +84,19 @@ async def upload_document(doc_owner_name:str = Form(...),
         hash_result = KEYPAIR.hash_bytes(pdf_bytes)
         signature = KEYPAIR.sign(hash_result)
 
-        record = Credential(
-            id=unique_id,
-            doc_owner_name=doc_owner_name,
-            doc_owner_ic=doc_owner_ic,
-            document_type=doc_type,
-            issuer_name=issuer_name,
-            issue_date=issue_date,
-            hash=hash_result,
-            signature=signature,
-            verification_url=f"/static/{unique_id_str}_processed.pdf",
-        )
-        db.add(record)
-        db.commit()
+        # Use generic CRUD create operation
+        record_data = {
+            "id": unique_id,
+            "doc_owner_name": doc_owner_name,
+            "doc_owner_ic": doc_owner_ic,
+            "document_type": doc_type,
+            "issuer_name": issuer_name,
+            "issue_date": issue_date,
+            "hash": hash_result,
+            "signature": signature,
+            "verification_url": f"/static/{unique_id_str}_processed.pdf",
+        }
+        create(db, DocumentRecord, record_data)
 
         print(f"Token: {encrypted_doc_id}")
         return FileResponse(
@@ -123,7 +124,8 @@ async def verify_document(token: str,
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid token format")
 
-    document = db.query(Credential).filter(Credential.id == doc_id).first()
+    # Use generic CRUD get operation
+    document = get(db, DocumentRecord, doc_id)
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
@@ -188,7 +190,7 @@ def root():
 # Show basic info when QR is scanned	✅ Add a GET /verify route
 # Verify doc with file after scan	🔁 Redirect to upload form page
 #
-# Let me know and I’ll help generate the QR or add the HTML view if needed!
+# Let me know and I'll help generate the QR or add the HTML view if needed!
 
 
 

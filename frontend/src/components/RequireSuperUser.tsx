@@ -1,24 +1,27 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import type { ReactElement } from "react";
 
 interface Props {
-  children: React.ReactElement;
+  children: ReactElement;
 }
 
-const RequireSuperUser = ({ children }: Props) => {
-  const { user } = useAuth(); // Make sure this hook provides `user.isSuper`
+const RequireSuperUser = ({ children }: Props): ReactElement => {
+  const { user } = useAuth();
+
+  console.log("Checking access:", user);
 
   if (!user) {
-    // Not logged in — redirect to login
+    // Not logged in
     return <Navigate to="/login" replace />;
   }
 
-  if (!user.isSuper) {
-    // Logged in but not a super user — redirect somewhere else
-    return <Navigate to="/app/home-page" replace />;
+  if (!user.is_super) {
+    // Logged in but not super
+    return <Navigate to="/home-page" replace />;
   }
 
-  // User is super — render the protected content
+  // Super user — allow access
   return children;
 };
 

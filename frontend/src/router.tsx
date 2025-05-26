@@ -9,8 +9,6 @@ import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
 import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
 import RequireSuperUser from "./components/RequireSuperUser";
 
-
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -27,7 +25,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/app",
+    path: "/",
     element: <AuthenticatedLayout />, // Requires user to be logged in
     children: [
       {
@@ -48,7 +46,11 @@ const router = createBrowserRouter([
       },
       {
         path: "create-user", // accesible only by super user
-        element: <RequireSuperUser><CreateUser /></RequireSuperUser>, //to do RequireSuperUser
+        element: (
+          <RequireSuperUser>
+            <CreateUser />
+          </RequireSuperUser>
+        ),
       },
     ],
   },

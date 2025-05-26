@@ -1,10 +1,9 @@
-// context/AuthContext.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useState } from "react";
 import type { ReactNode } from "react";
 
 export interface User {
   email: string;
-  isSuper: boolean;
+  is_super: boolean;
 }
 
 export interface AuthContextType {
@@ -18,11 +17,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string) => {
-    // Replace with your real login logic/API call
+    // Simulate login (replace with API call)
     if (email === "admin@example.com") {
-      setUser({ email, isSuper: true });
+      setUser({ email, is_super: true });
     } else {
-      setUser({ email, isSuper: false });
+      setUser({ email, is_super: false });
     }
   };
 

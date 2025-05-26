@@ -1,4 +1,23 @@
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
 export default function LoginPage(): React.ReactElement{
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const loginAsSuperUser = async () => {
+      await login("admin@example.com", "anyPassword");
+      console.log("super user clicked");
+      navigate("/create-user");
+    };
+
+  const loginAsNormalUser = async () => {
+    await login("user@example.com", "anyPassword");
+    console.log("normal user clicked");
+    navigate("/create-user");
+  };
+
+
     return (
         <>
         <h2 className="text-center text-2xl/9 font-bold tracking-tight text-gray-900">
@@ -60,6 +79,14 @@ export default function LoginPage(): React.ReactElement{
               Start a 14 day free trial
             </a>
           </p>
+
+          <div style={{ padding: "2rem" }}>
+            <h2>Mock Login</h2>
+            <button onClick={loginAsSuperUser}>Log in as Superuser</button>
+            <button onClick={loginAsNormalUser} style={{ marginLeft: "1rem" }}>
+            Log in as Regular User
+        </button>
+        </div>
         </div>  
         </>
     );
