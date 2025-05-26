@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, InstrumentedAttribute
 from typing import Type, TypeVar, Any, Dict, List, Optional
 
 T = TypeVar('T')
@@ -21,6 +21,7 @@ def create(db: Session, model: Type[T], obj_in: Dict[str, Any]) -> T:
     db.refresh(db_obj)
     return db_obj
 
+
 def get(db: Session, model: Type[T], obj_id: Any) -> Optional[T]:
     """
     Retrieve a single record by its primary key.
@@ -34,6 +35,14 @@ def get(db: Session, model: Type[T], obj_id: Any) -> Optional[T]:
         Optional[T]: The model instance if found, else None.
     """
     return db.query(model).get(obj_id)
+
+
+def get_by_column(db: Session, model: Type[T], column_name: str, value: Any) -> Optional[T]:
+    column_attr = getattr(model, column_name, None)
+    if not isinstance(column_attr, InstrumentedAttribute):
+        raise ValueError(f"{column_name} is not a valid column of {model.__name__}")
+    return db.query(model).filter(column_attr == value).first()
+
 
 def get_multi(db: Session, model: Type[T], skip: int = 0, limit: int = 100) -> List[T]:
     """
