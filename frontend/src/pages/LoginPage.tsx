@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import axiosClient from "../services/axiosClient";
+
 
 
 export default function LoginPage(): React.ReactElement{
@@ -9,22 +9,20 @@ export default function LoginPage(): React.ReactElement{
   const [password, setPassword] = useState("");
   const [error, setError] = useState({__html:""});
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError({__html:""});
 
     try {
-      const response = await axiosClient.post("/login", {
-        email: email,
-        password: password
-      });
-
-      const userData = response.data;
-
-      navigate("/")
+      await login(email, password);
+      navigate("/home-page");
+    }catch (err){
+      setError({__html: "Invalid email or password"});
     }
-
-  }
+  };
 
     return (
         <>
@@ -33,6 +31,8 @@ export default function LoginPage(): React.ReactElement{
         </h2>
         <div className="mt-10 mb-20 sm:mx-auto sm:w-full sm:max-w-sm">
           <form action="#" method="POST" className="space-y-6" onSubmit={onSubmit}>
+            {error.__html && (<div className="bg-red-500 rounded py-2 px-3 text-white" 
+                dangerouslySetInnerHTML={error}></div>)}
             <div>
               <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
                 Staff email

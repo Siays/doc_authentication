@@ -18,21 +18,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (email: string, password: string) => {
-  //   // Simulate login (replace with API call)
-  //   if (email === "admin@example.com") {
-  //     setUser({ email, is_super: true });
-  //   } else {
-  //     setUser({ email, is_super: false });
-  //   }
-  // };
 
   try{
-    await axiosClient.post("/login", {email, password});
-    
-    const { data } = await axiosClient.get("/user");
-    setUser(data);
-  }
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
 
+    await axiosClient.post("/login", formData, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  
+    const { data } = await axiosClient.get("/user", {
+      withCredentials: true,
+    });
+
+    setUser({
+      email: data.email,
+      is_super: data.is_super,
+    });
+  } catch (error) {
+    console.error("Login failed:", error);
+    throw error;
+  }
+};
 
   return (
     <AuthContext.Provider value={{ user, login }}>

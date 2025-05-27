@@ -15,18 +15,14 @@ axiosClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response) {
-            // Handle specific error status codes
             switch (error.response.status) {
                 case 401:
-                    // Handle unauthorized access
-                    window.location.href = '/login';
+                    console.warn('Unauthorized');
                     break;
                 case 403:
-                    // Handle forbidden access
                     console.error('Forbidden access');
                     break;
                 case 404:
-                    // Handle not found
                     console.error('Resource not found');
                     break;
                 default:

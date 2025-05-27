@@ -3,11 +3,11 @@ from datetime import datetime
 from fastapi import APIRouter, Form, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from backend.db.database import get_db
-from backend.password_processor import pw_processor
-from backend.db.models.staff_system_acc import StaffSystemAcc
-from backend.db.crud import get_by_column, create, remove, get
-from backend.db.models.login_session import LoginSession
+from db.database import get_db
+from password_processor import pw_processor
+from db.models.staff_system_acc import StaffSystemAcc
+from db.crud import get_by_column, create, remove, get
+from db.models.login_session import LoginSession
 import uuid
 
 router = APIRouter()
@@ -60,8 +60,8 @@ def logout(request: Request, db: Session = Depends(get_db)):
     return response
 
 
-@router.get("/me")
-def get_me(request: Request, db: Session = Depends(get_db)):
+@router.get("/user")
+def get_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("session_token")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -78,5 +78,6 @@ def get_me(request: Request, db: Session = Depends(get_db)):
     return {
         "account_id": user.account_id,
         "email": user.email,
-        "account_holder_name": user.account_holder_name
+        "account_holder_name": user.account_holder_name,
+        "is_super" : user.is_super
     }
