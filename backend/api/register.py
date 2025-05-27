@@ -2,10 +2,10 @@
 from fastapi import APIRouter, Form, Depends
 from datetime import datetime
 from sqlalchemy.orm import Session
-from backend.db.database import get_db
-from backend.password_processor import pw_processor
-from backend.db.models.staff_system_acc import StaffSystemAcc
-from backend.db.crud import create
+from db.database import get_db
+from password_processor import pw_processor
+from db.models.staff_system_acc import StaffSystemAcc
+from db.crud import create
 
 router = APIRouter()
 
