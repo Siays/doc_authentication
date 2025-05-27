@@ -3,8 +3,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
-from .database import Base
-from extra.db.models.staff_system_acc import StaffSystemAcc
+from ..database import Base
+from .staff_system_acc import StaffSystemAcc
 
 class DocumentRecord(Base):
     __tablename__ = "document_records"

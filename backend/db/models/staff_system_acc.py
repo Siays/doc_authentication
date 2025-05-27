@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from db.database import Base
+from ..database import Base
 from .model_staff import Staff
 
 class StaffSystemAcc(Base):
