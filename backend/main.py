@@ -1,6 +1,7 @@
-from fastapi import File, UploadFile, FastAPI, HTTPException, Depends, Form, status
+from fastapi import File, UploadFile, FastAPI, HTTPException, Depends, Form
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import shutil
 import uuid
@@ -11,15 +12,25 @@ from qr_implementation.qr_processing import embed_qr_to_pdf, create_qr_url
 from sqlalchemy.orm import Session
 from uuid import UUID
 from db.database import get_db
-from db.models import DocumentRecord
-from extra.db.models.staff_system_acc import StaffSystemAcc
+from db.models.models import DocumentRecord
 from crypto.crypto import RSAKeyPair
 from crypto.url_processing import encrypt_doc_id, decrypt_doc_id
-from db.crud import create, get, get_by_column
-from extra.password_processor import pw_processor
+from db.crud import create, get
+from backend.api import register
 
 app = FastAPI(title="PDF Upload & QR Embedding API")
 app.mount("/static", StaticFiles(directory="uploads/with_qr"), name="static")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # frontend Vite default
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(login.router)
+app.include_router(register.router)
 
 load_dotenv()  # Load .env into os.environ
 LOCAL_HOST = os.getenv("LOCAL_HOST")
@@ -171,49 +182,6 @@ async def verify_document(token: str,
             "reason": "Hash mismatch and signature verification failed."
         })
 
-
-# @app.post("/create-user")
-# def create_user(password:str = Form(...),
-#                         db: Session = Depends(get_db)):
-#     result = pw_processor.hash_password(password)
-#
-#     print("Hash:", result["hash"])
-#
-#     from datetime import datetime
-#
-#     record_data = {
-#         "staff_id": "1",
-#         "account_holder_name" : "Alice Tan",
-#         "email": "alice.tan@example.com",
-#         "password_hash": result["hash"],
-#         "last_login_at": datetime.utcnow(),
-#         "is_super": True
-#     }
-#
-#     new_account = create(db, StaffSystemAcc, record_data)
-#
-#     return {
-#         "account_id": new_account.account_id,
-#         "staff_id": new_account.staff_id,
-#         "email": new_account.email,
-#         "is_super": new_account.is_super,
-#         "last_login_at": new_account.last_login_at.isoformat(),  # make datetime JSON serializable
-#     }
-#
-# @app.post("/login")
-# def login(email: str = Form(...),
-#             password:str = Form(...),
-#                         db: Session = Depends(get_db)):
-#     user = get_by_column(db, StaffSystemAcc, "email", email)
-#     if not user:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
-#
-#     # Verify password using your pw_processor's verify function
-#     valid = pw_processor.verify_password(password, user.password_hash)
-#     if not valid:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
-#
-#     return {"success": True, "account_id": user.account_id}
 
 @app.get("/")
 def root():

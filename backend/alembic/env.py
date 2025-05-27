@@ -1,18 +1,21 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
 
-# Import all models here
 from db.database import Base
-from db.models import DocumentRecord
-from extra.db.models.model_staff import Staff
+from db.models.staff_system_acc import StaffSystemAcc
+from db.models.models import DocumentRecord
+from db.models.model_staff import Staff
+from db.models.login_session import LoginSession
 
 # Load environment variables
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

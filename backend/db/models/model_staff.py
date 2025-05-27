@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Date, Boolean, Enum as SqlEnum, BigInteger
 import enum
-from db.database import Base
+from ..database import Base
 
 # Define the valid gender values
 class GenderEnum(str, enum.Enum):
