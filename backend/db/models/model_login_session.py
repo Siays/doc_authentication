@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 from ..database import Base
-from .staff_system_acc import StaffSystemAcc
+from .model_staff_system_acc import StaffSystemAcc
 
 
 class LoginSession(Base):

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, InstrumentedAttribute
 from typing import Type, TypeVar, Any, Dict, List, Optional
-
+from sqlalchemy import select
 T = TypeVar('T')
 
 def create(db: Session, model: Type[T], obj_in: Dict[str, Any]) -> T:
@@ -93,4 +93,51 @@ def remove(db: Session, model: Type[T], obj_id: Any) -> Optional[T]:
     if obj:
         db.delete(obj)
         db.commit()
-    return obj 
+    return obj
+
+
+def get_filtered_column_values(
+    db: Session,
+    model: Type[T],
+    column: InstrumentedAttribute,
+    exclude_subquery: Any,
+    search: str,
+    limit: int = 10
+) -> List[str]:
+    """
+    Retrieve distinct values from a model's column that:
+    - Do not exist in a subquery (e.g., to exclude used values)
+    - Match a search string (case-insensitive, partial match)
+
+    Parameters:
+        db (Session): SQLAlchemy database session.
+        model (Type[T]): The SQLAlchemy model class.
+        column (InstrumentedAttribute): Column of the model to filter (e.g., Staff.email).
+        exclude_subquery (Any): Subquery whose results will be excluded via NOT IN.
+        search (str): Search string for filtering values using ILIKE.
+        limit (int): Maximum number of values to return.
+
+    Returns:
+        List[str]: List of filtered values from the specified column.
+
+    Example usage:
+        get_filtered_column_values(
+        db=db,
+        model=Staff,
+        column=Staff.email,
+        exclude_subquery=db.query(StaffSystemAcc.email).subquery(),
+        search="ali",
+        limit=10)
+    """
+    query = (
+        db.query(column)
+        .filter(~column.in_(select(exclude_subquery)))
+        .filter(column.ilike(f"%{search}%"))
+        .order_by(column)
+        .limit(limit)
+    )
+
+    results = query.all()
+    return [str(r[0]) for r in results]
+
+

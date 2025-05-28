@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
 from ..database import Base
-from .staff_system_acc import StaffSystemAcc
+from .model_staff_system_acc import StaffSystemAcc
 
 class DocumentRecord(Base):
     __tablename__ = "document_records"
