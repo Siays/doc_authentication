@@ -7,7 +7,11 @@ import tseslint from 'typescript-eslint'
 export default tseslint.config(
   { ignores: ['dist'] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
@@ -16,6 +20,7 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      'import': require('eslint-plugin-import'),
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -23,6 +28,19 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      'import/order': ['warn', { groups: ['builtin', 'external', 'internal'] }],
     },
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
+      sourceType: 'module',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+      
   },
 )

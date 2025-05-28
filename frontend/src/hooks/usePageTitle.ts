@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { LayoutContext } from "../components/AuthenticatedLayout";
+import { LayoutContext } from "../context/LayoutContext";
 
 /**
  * Sets the browser tab title.

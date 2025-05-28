@@ -8,6 +8,7 @@ import CreateUser from "./pages/CreateUser";
 import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
 import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
 import RequireSuperUser from "./components/RequireSuperUser";
+import RequireGuest from "./components/RequireGuest";
 
 const router = createBrowserRouter([
   {
@@ -16,12 +17,13 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/login",
-        element: <LoginPage />,
+        element: (
+          <RequireGuest>
+            <LoginPage />
+          </RequireGuest>
+        ),
       },
-      {
-        index: true,
-        element: <Navigate to="/login" />,
-      },
+
     ],
   },
   {
