@@ -1,6 +1,13 @@
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export default function GuestLayout() {
+  const { user } = useAuth();
+
+  if (user){
+    return <Navigate to="/home-page" />;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 b">
       <div className="w-full max-w-sm">

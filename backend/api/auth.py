@@ -33,6 +33,11 @@ def login(email: str = Form(...),
         "session_token":session_token,
         "created_at": datetime.utcnow()
     }
+
+    print("Input password:", password)
+    print("Stored hash:", user.password_hash)
+    print("Password valid?", pw_processor.verify_password(password, user.password_hash))
+
     create(db, LoginSession, record_data)
 
     response = JSONResponse(content={"success": True, "account_id": user.account_id})
@@ -79,5 +84,6 @@ def get_user(request: Request, db: Session = Depends(get_db)):
         "account_id": user.account_id,
         "email": user.email,
         "account_holder_name": user.account_holder_name,
-        "is_super" : user.is_super
+        "profile_picture": user.profile_img,
+        "is_super": user.is_super
     }
