@@ -8,24 +8,23 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Navigate, NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { createContext, useState } from "react";
+import { useState } from "react";
 import { LayoutContext } from "../context/LayoutContext";
 
 const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
-  { name: "Sign out", href: "#" },
+  { name: "Your Profile", to: "#" },
+  { name: "Settings", to: "#" },
+  { name: "Sign out", to: "/login" },
 ];
-
 
 function classNames(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function AuthenticatedLayout() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const navigation = [
     { name: "Home", to: "/home-page" },
@@ -39,7 +38,7 @@ export default function AuthenticatedLayout() {
 
   return (
     <>
-      <LayoutContext.Provider value={{ setTitle }}>    
+      <LayoutContext.Provider value={{ setTitle }}>
         <div className="min-h-full">
           <Disclosure as="nav" className="bg-gray-800">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -80,8 +79,8 @@ export default function AuthenticatedLayout() {
                     {/* Profile dropdown */}
                     <Menu as="div" className="relative ml-3">
                       <div>
-                      <MenuButton className="relative flex items-center p-1 bg-gray-600 rounded-full hover:ring-2 ring-indigo-300">
-                        <span className="absolute -inset-1.5" />
+                        <MenuButton className="relative flex items-center p-1 bg-gray-600 rounded-full hover:ring-2 ring-indigo-300">
+                          <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
                           {user?.profile_picture ? (
                             <img
@@ -102,25 +101,43 @@ export default function AuthenticatedLayout() {
                       >
                         {userNavigation.map((item) => (
                           <MenuItem key={item.name}>
-                            <a
-                              href={item.href}
-                              className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
-                            >
-                              {item.name}
-                            </a>
+                            {({ active }) =>
+                              item.name === "Sign out" ? (
+                                <button
+                                  onClick={logout}
+                                  className={classNames(
+                                    active ? "bg-gray-100" : "",
+                                    "w-full text-left block px-4 py-2 text-sm text-gray-700"
+                                  )}
+                                >
+                                  {item.name}
+                                </button>
+                              ) : (
+                                <NavLink
+                                  to={item.to!}
+                                  className={({ isActive }) =>
+                                    classNames(
+                                      active || isActive ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
+                                    )
+                                  }
+                                >
+                                  {item.name}
+                                </NavLink>
+                              )
+                            }
                           </MenuItem>
                         ))}
                       </MenuItems>
                     </Menu>
                     <div className="ml-4 flex flex-col items-start text-left leading-tight text-white min-w-0">
-  <span className="font-bold truncate max-w-[160px] md:max-w-[200px] lg:max-w-[250px]">
-    {user?.name}
-  </span>
-  <span className="text-xs text-gray-300 break-all">
-  {user?.email}
-</span>
-</div>
-
+                      <span className="font-bold truncate max-w-[160px] md:max-w-[200px] lg:max-w-[250px]">
+                        {user?.name}
+                      </span>
+                      <span className="text-xs text-gray-300 break-all">
+                        {user?.email}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="-mr-2 flex md:hidden">
@@ -181,16 +198,33 @@ export default function AuthenticatedLayout() {
                   </button>
                 </div>
                 <div className="mt-3 space-y-1 px-2">
-                  {userNavigation.map((item) => (
-                    <DisclosureButton
-                      key={item.name}
-                      as="a"
-                      href={item.href}
-                      className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                    >
-                      {item.name}
-                    </DisclosureButton>
-                  ))}
+                  {userNavigation.map((item) =>
+                    item.name === "Sign out" ? (
+                      <DisclosureButton
+                        key={item.name}
+                        as="button"
+                        onClick={logout}
+                        className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                      >
+                        {item.name}
+                      </DisclosureButton>
+                    ) : (
+                      <NavLink
+                        key={item.name}
+                        to={item.to!}
+                        className={({ isActive }) =>
+                          classNames(
+                            isActive
+                              ? "bg-gray-700 text-white"
+                              : "text-gray-400 hover:bg-gray-700 hover:text-white",
+                            "block rounded-md px-3 py-2 text-base font-medium"
+                          )
+                        }
+                      >
+                        {item.name}
+                      </NavLink>
+                    )
+                  )}
                 </div>
               </div>
             </DisclosurePanel>

@@ -9,6 +9,7 @@ import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
 import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
 import RequireSuperUser from "./components/RequireSuperUser";
 import RequireGuest from "./components/RequireGuest";
+import RequireAuth from "./components/RequireAuth";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <AuthenticatedLayout />, // Requires user to be logged in
+    element: <RequireAuth><AuthenticatedLayout /></RequireAuth>, // Requires user to be logged in
     children: [
       {
         path: "home-page",

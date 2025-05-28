@@ -12,6 +12,7 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -62,12 +63,23 @@ const fetchUser = async () => {
   }
 };
 
+const logout = async () => {
+  try {
+    await axiosClient.post("/logout", {
+      withCredentials: true,
+    });
+    setUser(null);
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+
 useEffect(() => {
   fetchUser();
 }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, isLoading}}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading}}>
       {children}
     </AuthContext.Provider>
   );
