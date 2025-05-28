@@ -16,7 +16,7 @@ from db.models.models import DocumentRecord
 from crypto.crypto import RSAKeyPair
 from crypto.url_processing import encrypt_doc_id, decrypt_doc_id
 from db.crud import create, get
-from api import auth,register
+from api import auth_management, user_management
 
 app = FastAPI(title="PDF Upload & QR Embedding API")
 app.mount("/static", StaticFiles(directory="uploads/with_qr"), name="static")
@@ -29,8 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(register.router)
+app.include_router(auth_management.router)
+app.include_router(user_management.router)
 
 load_dotenv()  # Load .env into os.environ
 LOCAL_HOST = os.getenv("LOCAL_HOST")

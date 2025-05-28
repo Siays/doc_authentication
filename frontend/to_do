@@ -1,15 +1,28 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Solved
 login
 1. logout function haven't link
- 
 4. logged in but able to navigate back to /login, which suppose to back to home-page
-5. after logged in, back to login back, and able to navigate back to home-page
-
 6. On log out, still stay in home-page, also able to navigate back to home-page after logged out
-
-
-
-
-
 
 
 

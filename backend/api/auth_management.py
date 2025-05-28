@@ -5,9 +5,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from db.database import get_db
 from password_processor import pw_processor
-from db.models.staff_system_acc import StaffSystemAcc
+from db.models.model_staff_system_acc import StaffSystemAcc
 from db.crud import get_by_column, create, remove, get
-from db.models.login_session import LoginSession
+from db.models.model_login_session import LoginSession
 import uuid
 
 router = APIRouter()

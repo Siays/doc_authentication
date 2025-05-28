@@ -8,10 +8,10 @@ from alembic import context
 from dotenv import load_dotenv
 
 from db.database import Base
-from db.models.staff_system_acc import StaffSystemAcc
+from db.models.model_staff_system_acc import StaffSystemAcc
 from db.models.models import DocumentRecord
 from db.models.model_staff import Staff
-from db.models.login_session import LoginSession
+from db.models.model_login_session import LoginSession
 
 # Load environment variables
 # BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
