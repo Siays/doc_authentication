@@ -4,6 +4,7 @@ login
 4. logged in but able to navigate back to /login, which suppose to back to home-page
 5. after logged in, back to login back, and able to navigate back to home-page
 
+6. On log out, still stay in home-page, also able to navigate back to home-page after logged out
 
 
 
@@ -12,36 +13,9 @@ login
 
 
 
-6. if we are being redirect to /login on every time reload, how do we retain the user on the current page when they are reloading the current page?
+
 7. what if the user is halfway entering data and refresh the page?
 
-✅ 6. How to Stay on the Same Page After a Refresh (Avoid Forced /login Redirect)
-This issue arises when your app doesn't wait for session validation before deciding that the user is unauthenticated.
-
-✅ Solution
-Use a loading state in AuthProvider and block routing until it’s resolved, like we discussed earlier:
-
-tsx
-Copy
-Edit
-<AuthProvider>
-  {loading ? <LoadingScreen /> : <RouterProvider router={router} />}
-</AuthProvider>
-This ensures that:
-
-On refresh, the app waits for the session check (/api/me) to complete.
-
-If the session is valid, the user stays on the current route.
-
-No redirect to /login happens unless the session is actually expired.
-
-If you use a layout or route guard like:
-
-tsx
-Copy
-Edit
-if (!user) return <Navigate to="/login" />;
-…then without loading, this logic executes immediately — sending the user to /login before the fetch resolves.
 
 ✅ 7. What If User is Mid-Form and Refreshes the Page?
 This is a broader UX concern and not specific to auth — form state is always lost on full refresh unless you persist it manually.
