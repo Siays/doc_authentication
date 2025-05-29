@@ -20,6 +20,7 @@ from api import auth_management, user_management
 
 app = FastAPI(title="PDF Upload & QR Embedding API")
 app.mount("/static", StaticFiles(directory="uploads/with_qr"), name="static")
+app.mount("/profile-pics", StaticFiles(directory="uploads/user_profile_pic"), name="profile_pics")
 
 app.add_middleware(
     CORSMiddleware,

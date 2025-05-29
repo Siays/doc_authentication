@@ -82,6 +82,7 @@ def get_user(request: Request, db: Session = Depends(get_db)):
 
     return {
         "account_id": user.account_id,
+        "first_time_login":user.first_time_login,
         "email": user.email,
         "account_holder_name": user.account_holder_name,
         "profile_picture": user.profile_img,

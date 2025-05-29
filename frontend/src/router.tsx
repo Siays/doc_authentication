@@ -4,12 +4,13 @@ import GuestLayout from "./components/GuestLayout";
 import AuthenticatedLayout from "./components/AuthenticatedLayout";
 import HomePage from "./pages/HomePage";
 import NewDocument from "./pages/NewDocument";
-import CreateUser from "./pages/CreateUser";
+import CreateUser from "./pages/CreateUserPage";
 import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
 import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
 import RequireSuperUser from "./components/RequireSuperUser";
 import RequireGuest from "./components/RequireGuest";
 import RequireAuth from "./components/RequireAuth";
+import ModifyUserPage from "./pages/ModifyUserPage";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,14 @@ const router = createBrowserRouter([
       },
 
     ],
+  },
+  {
+    path: "/first-login",  //first time login after user creation
+    element: (
+      <RequireAuth firstLoginOnly>
+        <ModifyUserPage />
+      </RequireAuth>
+    )
   },
   {
     path: "/",
@@ -54,6 +63,10 @@ const router = createBrowserRouter([
             <CreateUser />
           </RequireSuperUser>
         ),
+      },
+      {
+        path: "modify-user", // user menu version
+        element: <ModifyUserPage />,
       },
     ],
   },

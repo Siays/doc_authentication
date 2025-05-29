@@ -15,7 +15,7 @@ class StaffSystemAcc(Base):
     last_login_at = Column(DateTime(timezone=True), nullable=False)
     is_super = Column(Boolean, default=False, nullable=False)
     profile_img = Column(String(255), nullable=True)
-    temp_password = Column(Boolean, default=True, nullable=False)
+    first_time_login = Column(Boolean, default=True, nullable=False)
 
     staff = relationship("Staff")
 
