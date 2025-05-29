@@ -6,6 +6,8 @@ import router from './router.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import LoadingScreen from './components/LoadingScreen.tsx'
 import { useAuth } from './hooks/useAuth.ts'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [showGate, setShowGate] = useState(false);
@@ -22,7 +24,12 @@ function AppWrapper(){
 
   if (isLoading) return <LoadingScreen />;
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer position="top-center" />
+    </>
+  )
 }
 
 createRoot(document.getElementById('root')!).render(

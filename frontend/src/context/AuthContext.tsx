@@ -5,6 +5,7 @@ import axiosClient from "../services/axiosClient";
 export interface User {
   email: string;
   is_super: boolean;
+  first_time_login: boolean;
   name: string;
   profile_picture: string | null;
 }
@@ -52,6 +53,7 @@ const fetchUser = async () => {
     setUser({
       email: data.email,
       is_super: data.is_super,
+      first_time_login: data.first_time_login,
       name: data.account_holder_name,
       profile_picture: data.profile_picture,
     });

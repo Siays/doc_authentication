@@ -23,6 +23,9 @@ function classNames(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
+// for menu styling
+const dropdownItemClass = "block w-full px-4 py-2 text-sm text-left text-gray-700";
+
 export default function AuthenticatedLayout() {
   const { user, logout } = useAuth();
 
@@ -99,35 +102,26 @@ export default function AuthenticatedLayout() {
                         transition
                         className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                       >
-                        {userNavigation.map((item) => (
-                          <MenuItem key={item.name}>
-                            {({ active }) =>
-                              item.name === "Sign out" ? (
-                                <button
-                                  onClick={logout}
-                                  className={classNames(
-                                    active ? "bg-gray-100" : "",
-                                    "w-full text-left block px-4 py-2 text-sm text-gray-700"
-                                  )}
-                                >
-                                  {item.name}
-                                </button>
-                              ) : (
-                                <NavLink
-                                  to={item.to!}
-                                  className={({ isActive }) =>
-                                    classNames(
-                                      active || isActive ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
-                                    )
-                                  }
-                                >
-                                  {item.name}
-                                </NavLink>
-                              )
-                            }
-                          </MenuItem>
-                        ))}
+                          {userNavigation.map((item) => (
+    <MenuItem key={item.name}>
+      {({ active }) => {
+        const itemClasses = classNames(
+          active ? "bg-gray-100" : "",
+          dropdownItemClass
+        );
+
+        return item.name === "Sign out" ? (
+          <button onClick={logout} className={itemClasses}>
+            {item.name}
+          </button>
+        ) : (
+          <NavLink to={item.to!} className={itemClasses}>
+            {item.name}
+          </NavLink>
+        );
+      }}
+    </MenuItem>
+  ))}
                       </MenuItems>
                     </Menu>
                     <div className="ml-4 flex flex-col items-start text-left leading-tight text-white min-w-0">

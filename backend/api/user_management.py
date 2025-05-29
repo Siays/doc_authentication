@@ -1,40 +1,20 @@
-from fastapi import APIRouter, Form, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Form, Depends, File, UploadFile
 from datetime import datetime
 from sqlalchemy.orm import Session
 from db.database import get_db
 from password_processor import pw_processor
 from db.models.model_staff_system_acc import StaffSystemAcc
 from db.models.model_staff import Staff
-from db.crud import create, get_filtered_column_values, get_by_column
+from db.crud import create, get_filtered_column_values, get_by_column, update
+from fastapi import UploadFile
+from pathlib import Path
+import os
+UPLOAD_DIR = Path("uploads/user_profile_pic")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter()
-
-# @router.post("/create-user")
-# def create_user(email: str = Form(...),
-#                 password:str = Form(...),
-#                 db: Session = Depends(get_db)):
-#     result = pw_processor.hash_password(password)
-#
-#     print("Hash:", result["hash"])
-#
-#     record_data = {
-#         "staff_id": "1",
-#         "account_holder_name" : "Alice Tan",
-#         "email": "alice.tan@example.com",
-#         "password_hash": result["hash"],
-#         "last_login_at": datetime.utcnow(),
-#         "is_super": True
-#     }
-#
-#     new_account = create(db, StaffSystemAcc, record_data)
-#
-#     return {
-#         "account_id": new_account.account_id,
-#         "staff_id": new_account.staff_id,
-#         "email": new_account.email,
-#         "is_super": new_account.is_super,
-#         "last_login_at": new_account.last_login_at.isoformat(),  # make datetime JSON serializable
-#     }
 
 
 @router.post("/create-user")
@@ -93,3 +73,38 @@ def get_staff_info(email: str, db: Session = Depends(get_db)):
     }
 
 
+@router.post("/update-acc")
+def update_acc(email: str = Form(...),
+                password: str = Form(...),
+               profile_picture: Optional[UploadFile] = File(None),
+               db: Session = Depends(get_db)):
+    user = get_by_column(db, StaffSystemAcc, "email", email)
+    result = pw_processor.hash_password(password)
+
+    profile_picture_url = None
+    if profile_picture:
+        profile_picture_url = profile_pic_processing(file=profile_picture, acc_id=user.account_id)
+
+    updated_data = {
+        "password_hash": result["hash"],
+        "profile_img":  profile_picture_url
+    }
+
+    update(db, user, updated_data)
+
+
+def profile_pic_processing(file: UploadFile, acc_id: int) -> str:
+    ext = Path(file.filename).suffix
+    filename = f"{acc_id}{ext}"
+    file_path = UPLOAD_DIR / filename
+
+    for old_file in UPLOAD_DIR.glob(f"{acc_id}.*"):
+        # in case of the existing file is different ext,
+        # which may result in failed to overwrite, then we delete it
+        if old_file.name != filename:
+            old_file.unlink()
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(file.file.read())
+
+    return f"/profile-pics/{filename}"
