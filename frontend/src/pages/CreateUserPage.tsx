@@ -86,10 +86,11 @@ export default function CreateUser(): React.ReactElement {
           "Content-Type": "multipart/form-data",
         },
       });
-
+      
       form.reset();
       // console.log("User created, showing toast...");
       toast.success("User created successfully", { autoClose: 3000 });
+      navigate("/home-page");
     } catch (error) {
       toast.error("Failed to create user", { autoClose: 3000 });
     }

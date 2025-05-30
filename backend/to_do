@@ -3,7 +3,17 @@ sanitize user form data before enter db,
 strong typing
 
 
+
+
 user_profile_pic
 - Resize or validate image types.
 - Automatically create the upload directory if missing.
 - Support image previews via /static/... route.
+
+
+
+
+
+
+
+user.first_time_login should handle by backend rather than frontend? yes

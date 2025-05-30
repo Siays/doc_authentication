@@ -1,20 +1,25 @@
 import { useDropzone } from 'react-dropzone';
 import { useState, useEffect } from 'react';
 
-export default function DropzoneUploader() {
+type Props = {
+  onFileSelect: (file: File) => void;
+};
+
+export default function DropzoneUploader({onFileSelect}: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       'image/jpeg': [],
+      'image/jpg': [],
       'image/png': [],
     },
     multiple: false,
     onDrop: (acceptedFiles) => {
       const selected = acceptedFiles[0];
       if (selected) {
-        setFile(selected);
+        onFileSelect(selected);
         setPreview(URL.createObjectURL(selected));
       }
     },

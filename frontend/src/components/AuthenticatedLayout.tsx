@@ -29,6 +29,13 @@ const dropdownItemClass = "block w-full px-4 py-2 text-sm text-left text-gray-70
 export default function AuthenticatedLayout() {
   const { user, logout } = useAuth();
 
+  const baseURL = import.meta.env.VITE_FAST_API_BASE_URL;
+  const profilePictureURL = user?.profile_picture
+  ? `${baseURL}${user.profile_picture}?t=${new Date().getTime()}`
+  : null;
+
+  
+
   const navigation = [
     { name: "Home", to: "/home-page" },
     { name: "New Document", to: "/new-document" },
@@ -88,8 +95,8 @@ export default function AuthenticatedLayout() {
                           {user?.profile_picture ? (
                             <img
                               alt="Profile Picture"
-                              src={user.profile_picture}
-                              className="h-12 w-12 rounded-full object-cover"
+                              src={profilePictureURL || "#"}
+                              className="h-10 w-10 rounded-full object-cover"
                             />
                           ) : (
                             <span className="material-symbols-outlined text-white text-3xl">
@@ -172,7 +179,7 @@ export default function AuthenticatedLayout() {
               <div className="border-t border-gray-700 pt-4 pb-3">
                 <div className="flex items-center px-5">
                   <div className="shrink-0">
-                    <img alt="" src={"#"} className="size-10 rounded-full" />
+                    <img alt="Profile Picture" src={profilePictureURL || "#"} className="size-10 rounded-full" />
                   </div>
                   <div className="ml-3">
                     <div className="text-base/5 font-medium text-white">
