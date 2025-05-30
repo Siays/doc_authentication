@@ -12,8 +12,9 @@ export interface User {
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe: boolean) => Promise<void>;
   logout: () => Promise<void>;
+  fetchUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -23,12 +24,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean) => {
 
   try{
     const formData = new FormData();
     formData.append("email", email);
     formData.append("password", password);
+    formData.append("remember_me", rememberMe.toString());
 
     await axiosClient.post("/login", formData, {
       withCredentials: true,
@@ -81,7 +83,7 @@ useEffect(() => {
 }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading}}>
+    <AuthContext.Provider value={{ user, login, logout, fetchUser,isLoading}}>
       {children}
     </AuthContext.Provider>
   );

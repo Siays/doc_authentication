@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with custom configuration
 const axiosClient = axios.create({
-    baseURL: import.meta.env.FAST_API_BASE_URL || 'http://localhost:8050',
+    baseURL: import.meta.env.VITE_FAST_API_BASE_URL || 'http://localhost:8050',
     headers: {
         'Content-Type': 'application/json',
     },

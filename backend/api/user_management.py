@@ -1,6 +1,5 @@
 from typing import Optional
-
-from fastapi import APIRouter, Form, Depends, File, UploadFile
+from fastapi import APIRouter, Form, Depends, File
 from datetime import datetime
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -10,7 +9,9 @@ from db.models.model_staff import Staff
 from db.crud import create, get_filtered_column_values, get_by_column, update
 from fastapi import UploadFile
 from pathlib import Path
-import os
+from db.data_validator.validator import (validate_email,
+                                         validate_password,
+                                         validate_profile_pic_ext)
 UPLOAD_DIR = Path("uploads/user_profile_pic")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -27,7 +28,11 @@ def create_user(
     db: Session = Depends(get_db)
     ):
 
-    result = pw_processor.hash_password(password)
+    result = {}
+
+    if validate_password(password):
+        result = pw_processor.hash_password(password)
+    validate_email(email)
 
     record_data = {
         "staff_id": staff_id,
@@ -75,22 +80,28 @@ def get_staff_info(email: str, db: Session = Depends(get_db)):
 
 @router.post("/update-acc")
 def update_acc(email: str = Form(...),
-                password: str = Form(...),
+               password: str = Form(...),
                profile_picture: Optional[UploadFile] = File(None),
                db: Session = Depends(get_db)):
     user = get_by_column(db, StaffSystemAcc, "email", email)
     result = pw_processor.hash_password(password)
 
-    profile_picture_url = None
-    if profile_picture:
-        profile_picture_url = profile_pic_processing(file=profile_picture, acc_id=user.account_id)
-
     updated_data = {
         "password_hash": result["hash"],
-        "profile_img":  profile_picture_url
     }
+    print(profile_picture)
+    if profile_picture:
+        profile_picture_url = profile_pic_processing(file=profile_picture, acc_id=user.account_id)
+        updated_data["profile_img"] = profile_picture_url
+
+    if user.first_time_login:
+        updated_data["first_time_login"] = False
 
     update(db, user, updated_data)
+
+    return {
+        "message": "Update successful"
+    }
 
 
 def profile_pic_processing(file: UploadFile, acc_id: int) -> str:

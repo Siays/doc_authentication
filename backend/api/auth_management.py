@@ -16,6 +16,7 @@ router = APIRouter()
 @router.post("/login")
 def login(email: str = Form(...),
           password: str = Form(...),
+          remember_me: bool = Form(...),
           db: Session = Depends(get_db)):
 
     user = get_by_column(db, StaffSystemAcc, "email", email)
@@ -42,9 +43,16 @@ def login(email: str = Form(...),
 
     response = JSONResponse(content={"success": True, "account_id": user.account_id})
 
+    max_age = None
+
+    if remember_me:
+        max_age = 60*60*10
+
     response.set_cookie(
         key="session_token",
         value=str(session_token),
+        max_age = max_age,
+        samesite="lax",
         httponly=True,
     )
 
