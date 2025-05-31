@@ -1,10 +1,11 @@
 import { usePageTitles } from "../hooks/usePageTitle";
 import { FaPlus, FaEdit , FaFilter} from "react-icons/fa";
 import { MdOutlineDocumentScanner  } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   usePageTitles("Home", "Home Page");
-
+  
   const recentDocs = Array(9).fill({
     docType: "IC",
     ownerName: "Sia Yeong Sheng Sia Yeong",
@@ -19,19 +20,21 @@ export default function HomePage() {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left: Action Buttons */}
         <div className="flex flex-col gap-6 w-full md:w-1/4">
-          <ActionButton icon={<FaPlus size={35}/>} text="New Document" />
-          <ActionButton icon={<FaEdit size={35}/>} text="Edit Document" />
-          <ActionButton icon={<MdOutlineDocumentScanner size={35}/>} text="Authenticate Document" />
+          <ActionButton icon={<FaPlus size={35}/>} text="New Document"  route="/new-document"/>
+          <ActionButton icon={<FaEdit size={35}/>} text="Edit Document" route="/edit-document"/>
+          <ActionButton icon={<MdOutlineDocumentScanner size={35}/>} text="Authenticate Document" route="/authenticate-document"/>
         </div>
 
         {/* Right: Recent List Table */}
         <div className="w-full md:w-3/4">
           <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Recent list</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
+          <span>Filter</span>
             <button className="px-4 py-2 text-blue-600 rounded hover:bg-blue-300 transition-colors">
               <FaFilter size={16}/>
             </button>
+            
           </div>
           </div>
           <div className="overflow-x-auto border rounded-md">
@@ -67,11 +70,14 @@ export default function HomePage() {
 }
 
 // Helper Component for Action Buttons
-function ActionButton({ icon, text }: { icon: React.ReactNode; text: string }) {
+function ActionButton({ icon, text, route }: { icon: React.ReactNode; text: string, route: string}) {
+  const navigate = useNavigate();
   return (
-    <button className="flex flex-col items-center justify-center w-full h-[163px] border-2 border-blue-500 rounded text-blue-600 hover:bg-blue-50 transition-all">
-    <div className="text-2xl mb-1">{icon}</div>
-    <span className="mt-3 text-sm font-bold text-black">{text}</span>
-  </button>
+    <button 
+      onClick={() => navigate(route)}
+      className="flex flex-col items-center justify-center w-full h-[163px] border-2 border-blue-500 rounded text-blue-600 hover:bg-blue-50 transition-all">
+      <div className="text-2xl mb-1">{icon}</div>
+      <span className="mt-3 text-sm font-bold text-black">{text}</span>
+    </button>
   );
 }

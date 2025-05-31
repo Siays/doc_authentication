@@ -1,11 +1,18 @@
 
 
+1. filter list
+2. link the button to the targeted page
+
+
+
+
+
+
 
 
 1. understand how useReducer work
 2. add arrow for navigate back to one hierarchy up
 3. backend validation
-4. create user remove using self-create validation
 
 
 
