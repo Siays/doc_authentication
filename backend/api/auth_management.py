@@ -96,3 +96,17 @@ def get_user(request: Request, db: Session = Depends(get_db)):
         "profile_picture": user.profile_img,
         "is_super": user.is_super
     }
+
+
+@router.post("/check-old-password")
+def get_old_password(email: str = Form(...),
+                     password: str = Form(...),
+                     db: Session = Depends(get_db)):
+    user = get_by_column(db, StaffSystemAcc, "email", email)
+
+    if not pw_processor.verify_password(password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Old password is incorrect"
+        )
+

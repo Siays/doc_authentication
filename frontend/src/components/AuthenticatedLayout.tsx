@@ -14,9 +14,8 @@ import { useState } from "react";
 import { LayoutContext } from "../context/LayoutContext";
 
 const userNavigation = [
-  { name: "Your Profile", to: "#" },
-  { name: "Settings", to: "#" },
-  { name: "Sign out", to: "/login" },
+  { name: "Update Account", to: "/modify-user" },
+  { name: "Sign out", to: "#" },
 ];
 
 function classNames(...classes: (string | false | null | undefined)[]): string {

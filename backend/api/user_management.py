@@ -80,16 +80,21 @@ def get_staff_info(email: str, db: Session = Depends(get_db)):
 
 @router.post("/update-acc")
 def update_acc(email: str = Form(...),
-               password: str = Form(...),
+               password: str = Form(None),
                profile_picture: Optional[UploadFile] = File(None),
-               db: Session = Depends(get_db)):
-    user = get_by_column(db, StaffSystemAcc, "email", email)
-    result = pw_processor.hash_password(password)
 
-    updated_data = {
-        "password_hash": result["hash"],
-    }
-    print(profile_picture)
+               db: Session = Depends(get_db)):
+
+    user = get_by_column(db, StaffSystemAcc, "email", email)
+    updated_data = {}
+
+    if password is not None:
+        result = pw_processor.hash_password(password)
+
+        updated_data = {
+            "password_hash": result["hash"],
+        }
+
     if profile_picture:
         profile_picture_url = profile_pic_processing(file=profile_picture, acc_id=user.account_id)
         updated_data["profile_img"] = profile_picture_url
