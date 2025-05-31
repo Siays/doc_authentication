@@ -3,18 +3,21 @@ import { useState, useEffect } from 'react';
 
 type Props = {
   onFileSelect: (file: File) => void;
+  fileType: {[mimeType: string]: string[]};
+  message: string;
 };
 
-export default function DropzoneUploader({onFileSelect}: Props) {
+export default function DropzoneUploader({onFileSelect, fileType, message}: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'image/jpeg': [],
-      'image/jpg': [],
-      'image/png': [],
-    },
+    // accept: {
+    //   'image/jpeg': [],
+    //   'image/jpg': [],
+    //   'image/png': [],
+    // },
+    accept: fileType,
     multiple: false,
     onDrop: (acceptedFiles) => {
       const selected = acceptedFiles[0];
@@ -43,8 +46,8 @@ export default function DropzoneUploader({onFileSelect}: Props) {
 
         {!preview ? (
           <>
-            <p className="mb-1 font-medium text-gray-600">Drag & drop an image here, or click to select</p>
-            <p className="text-xs text-gray-400">Only JPG or PNG, max 1 file</p>
+            <p className="mb-1 font-medium text-gray-600">Drag & drop your file here, or click to select</p>
+            <p className="text-xs text-gray-400">{message}</p>
           </>
         ) : (
           <div className="flex flex-col items-center">

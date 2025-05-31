@@ -284,6 +284,13 @@ export default function ModifyUserPage() {
               </label>
               <DropzoneUploader
                 onFileSelect={(file) => setValue("profileImage", file)}
+                message = "Only JPG or PNG, max 1 file"
+                  fileType = {
+                  {
+                    "image/jpeg": [".jpg", ".jpeg"],
+                    "image/png": [".png"],
+                  }
+                }
               />
             </div>
           </div>
@@ -328,6 +335,13 @@ export default function ModifyUserPage() {
               </label>
               <DropzoneUploader
                 onFileSelect={(file) => setValue("profileImage", file)}
+                message ="Only JPG or PNG, max 1 file"
+                fileType = {
+                  {
+                    "image/jpeg": [".jpg", ".jpeg"],
+                    "image/png": [".png"],
+                  }
+                }
               />
             </div>
 
