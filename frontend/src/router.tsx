@@ -11,6 +11,7 @@ import RequireSuperUser from "./components/RequireSuperUser";
 import RequireGuest from "./components/RequireGuest";
 import RequireAuth from "./components/RequireAuth";
 import ModifyUserPage from "./pages/ModifyUserPage";
+import RootRedirect from "./components/RootRedirect";
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,11 @@ const router = createBrowserRouter([
     element: <GuestLayout />,
     children: [
       {
-        path: "/login",
+        path: "",
+        element: <RootRedirect />
+      },
+      {
+        path: "login",
         element: (
           <RequireGuest>
             <LoginPage />
@@ -29,7 +34,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/first-login",  //first time login after user creation
+    path: "first-login",  //first time login after user creation
     element: (
       <RequireAuth firstLoginOnly>
         <ModifyUserPage />
