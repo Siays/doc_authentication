@@ -10,6 +10,7 @@ type Props = {
 export default function DropzoneUploader({onFileSelect, fileType, message}: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isImage, setIsImage] = useState<boolean>(false);
 
   const { getRootProps, getInputProps } = useDropzone({
     // accept: {
@@ -23,18 +24,26 @@ export default function DropzoneUploader({onFileSelect, fileType, message}: Prop
       const selected = acceptedFiles[0];
       if (selected) {
         onFileSelect(selected);
-        setPreview(URL.createObjectURL(selected));
+        setFile(selected);
+
+        if (selected.type.startsWith("image/")){
+          setIsImage(true);
+          setPreview(URL.createObjectURL(selected));
+        }else{
+          setIsImage(false);
+          setPreview(`${selected.name} selected`);
+        }
       }
     },
   });
 
   useEffect(() => {
     return () => {
-      if (preview) {
+      if (isImage &&preview) {
         URL.revokeObjectURL(preview);
       }
     };
-  }, [preview]);
+  }, [preview, isImage]);
 
   return (
     <div className="w-full">
@@ -44,12 +53,14 @@ export default function DropzoneUploader({onFileSelect, fileType, message}: Prop
       >
         <input {...getInputProps()} />
 
-        {!preview ? (
+        {!file ? (
           <>
-            <p className="mb-1 font-medium text-gray-600">Drag & drop your file here, or click to select</p>
+            <p className="mb-1 font-medium text-gray-600">
+              Drag & drop your file here, or click to select
+            </p>
             <p className="text-xs text-gray-400">{message}</p>
           </>
-        ) : (
+        ) : isImage && preview ? (
           <div className="flex flex-col items-center">
             <p className="text-xs text-gray-600 mb-1">Selected:</p>
             <img
@@ -58,6 +69,8 @@ export default function DropzoneUploader({onFileSelect, fileType, message}: Prop
               className="h-20 w-auto rounded border border-gray-200"
             />
           </div>
+        ) : (
+          <p className="text-xs text-gray-600">{preview}</p>
         )}
       </div>
     </div>

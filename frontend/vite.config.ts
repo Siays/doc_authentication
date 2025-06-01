@@ -7,4 +7,16 @@ export default defineConfig({
   server: {
     open: '/', // explicitly opens the root in browser
   },
+  optimizeDeps: {
+    include: ['pdfjs-dist']
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'pdfjs-dist': ['pdfjs-dist']
+        }
+      }
+    }
+  },
 })
