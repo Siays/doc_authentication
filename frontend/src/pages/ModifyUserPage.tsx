@@ -39,11 +39,7 @@ export default function ModifyUserPage() {
   const profileImage = watch("profileImage");
 
   const isChanged =
-    !!password ||
-    !!oldPassword ||
-    !!confirmPassword ||
-    !!profileImage;
-
+    !!password || !!oldPassword || !!confirmPassword || !!profileImage;
 
   const { user, fetchUser } = useAuth();
   const passwordFieldsFilled = oldPassword || password || confirmPassword;
@@ -57,7 +53,7 @@ export default function ModifyUserPage() {
       const resp = await axiosClient.get("/staff-info", {
         params: { email: user!.email },
       });
-      
+
       setValue("email", user!.email);
       setValue("staffId", resp.data.staff_id);
       setValue("staffName", resp.data.full_name);
@@ -87,31 +83,35 @@ export default function ModifyUserPage() {
       formData.append("email", data.email);
       if (user!.first_time_login) {
         formData.append("password", data.password);
-      }else{
-        const passwordFieldsFilled = data.oldPassword || data.password || data.confirmPassword;
-        if (passwordFieldsFilled){
-          if (!data.oldPassword || !data.password || !data.confirmPassword){          
+      } else {
+        const passwordFieldsFilled =
+          data.oldPassword || data.password || data.confirmPassword;
+        if (passwordFieldsFilled) {
+          if (!data.oldPassword || !data.password || !data.confirmPassword) {
             toast.error("Please fill in all password fields");
             return;
           }
 
-          try{
-            await axiosClient.post("/check-old-password",
+          try {
+            await axiosClient.post(
+              "/check-old-password",
               new URLSearchParams({
                 email: user!.email,
                 password: data.oldPassword,
               }),
-            {
-              headers: {"Content-Type": "application/x-www-form-urlencoded"},
-            });
-          }catch(err){
+              {
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+              }
+            );
+          } catch (err) {
             toast.error("Old password is incorrect");
             return;
           }
           formData.append("password", data.password);
         }
-
-        }    
+      }
 
       if (data.profileImage) {
         formData.append("profile_picture", data.profileImage);
@@ -284,13 +284,11 @@ export default function ModifyUserPage() {
               </label>
               <DropzoneUploader
                 onFileSelect={(file) => setValue("profileImage", file)}
-                message = "Only JPG or PNG, max 1 file"
-                  fileType = {
-                  {
-                    "image/jpeg": [".jpg", ".jpeg"],
-                    "image/png": [".png"],
-                  }
-                }
+                message="Only JPG or PNG, max 1 file"
+                fileType={{
+                  "image/jpeg": [".jpg", ".jpeg"],
+                  "image/png": [".png"],
+                }}
               />
             </div>
           </div>
@@ -335,13 +333,11 @@ export default function ModifyUserPage() {
               </label>
               <DropzoneUploader
                 onFileSelect={(file) => setValue("profileImage", file)}
-                message ="Only JPG or PNG, max 1 file"
-                fileType = {
-                  {
-                    "image/jpeg": [".jpg", ".jpeg"],
-                    "image/png": [".png"],
-                  }
-                }
+                message="Only JPG or PNG, max 1 file"
+                fileType={{
+                  "image/jpeg": [".jpg", ".jpeg"],
+                  "image/png": [".png"],
+                }}
               />
             </div>
 
@@ -384,7 +380,7 @@ export default function ModifyUserPage() {
                 {...register("confirmPassword", {
                   validate: (val) => {
                     const { oldPassword, password } = getValues();
-                    if ((oldPassword && password) && !val) {
+                    if (oldPassword && password && !val) {
                       return "Please confirm your new password";
                     }
                     if (passwordFieldsFilled && val !== password) {
@@ -406,35 +402,31 @@ export default function ModifyUserPage() {
             </div>
           </div>
         </div>
-      )} 
+      )}
 
+      <div className="mt-6 flex items-center justify-end gap-x-6">
+        {/* Cancel Button (for non-first time login only) */}
+        {user!.first_time_login ? (
+          " "
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate("/home-page")}
+            className="text-sm font-semibold text-gray-900"
+          >
+            Cancel
+          </button>
+        )}
 
-<div className="mt-6 flex items-center justify-end gap-x-6">
-  {/* Cancel Button (for non-first time login only) */}
-  {
-        user!.first_time_login ? " " : 
+        {/* Confirm Button (not allow to submit if no changes)*/}
         <button
-        type="button"
-        onClick={() => navigate("/home-page")}
-        className="text-sm font-semibold text-gray-900"
-      >
-        Cancel
-      </button>
-        
-      }
-       
-
-         {/* Confirm Button (not allow to submit if no changes)*/}
-        <button
-  type="submit"
-  className="rounded-md bg-indigo-600 px-6 py-2 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-  disabled={!isChanged}
->
-  Confirm
-</button>
+          type="submit"
+          className="rounded-md bg-indigo-600 px-6 py-2 text-white font-semibold hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!isChanged}
+        >
+          Confirm
+        </button>
       </div>
-    
-
     </form>
   );
 }
