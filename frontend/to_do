@@ -1,8 +1,6 @@
 
 create new document
-1. make IC validation immediately when user input incorrect format.
-  current issue: even when user hasn't finish typing yet then the error start to arise (immediately check only if 
-  "-" position is incorrect, the rest validation should start only after onBlur)
+
 
 
 home page
