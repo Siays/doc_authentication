@@ -3,6 +3,12 @@ import { usePageTitles } from "../hooks/usePageTitle";
 import DropzoneUploader from "../components/DropzoneUploader";
 import { useAuth } from "../hooks/useAuth";
 import { useForm } from "react-hook-form";
+import {
+  baseInputClass,
+  errorInputClass,
+  unmodifiableInputClass,
+  errorTextClass,
+} from "../style/inputFieldStyle";
 
 type FormValues = {
   email: string;
@@ -31,11 +37,18 @@ export default function NewDocument(): React.ReactElement {
     mode: "onTouched",
   });
 
+  const [hyphenError, setHyphenError] = useState("");
+
   useEffect(() => {
     if (user?.name) {
       setValue("issuer_name", user.name);
     }
   }, [user, setValue]);
+
+  useEffect(() => {
+    const today = new Date();
+      setValue("issue_date",  today.toISOString().split("T")[0]); // YYYY-MM-DD
+    }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -80,12 +93,12 @@ export default function NewDocument(): React.ReactElement {
                     message: "Name must contain only letters and spaces",
                   },
                 })}
-                className={`mt-2 block w-full rounded-md border px-3 py-2 shadow-sm outline outline-1 bg-white outline-gray-300 focus:outline-indigo-600 ${
-                  errors.doc_owner_name ? "outline-red-500 border-red-300" : ""
+                className={`${baseInputClass} ${
+                  errors.doc_owner_name ? `${errorInputClass}` : ""
                 }`}
               />
               {errors.doc_owner_name && (
-                <p className="text-sm text-red-600 mt-1">
+                <p className={`${errorTextClass}`}>
                   {errors.doc_owner_name.message}
                 </p>
               )}
@@ -101,26 +114,56 @@ export default function NewDocument(): React.ReactElement {
                   {...register("doc_owner_ic", {
                     required: "Document owner IC is required",
                     validate: (value) => {
+                      if (!value) return "Document owner IC is required";
                       if (value.length < 14)
                         return "IC must be 14 characters (e.g. 123456-78-9012)";
-                      if (value[6] !== "-" || value[9] !== "-")
-                        return "Hyphens must be in the correct position";
                       if (!/^\d{6}-\d{2}-\d{4}$/.test(value))
-                        return "Invalid IC format";
+                        return "Invalid IC format (format expected: 123456-78-9012)";
                       return true;
                     },
                   })}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    setValue("doc_owner_ic", value);
-                    trigger("doc_owner_ic"); // This will call the validate above
+                    let value = e.target.value;
+        
+                    // Manual hyphen error detection (runs while typing)
+                    if (value.length === 7 && value[6] !== "-") {
+                      setHyphenError(
+                        "First hyphen should be after 6 digits (e.g. 123456-)"
+                      );
+                      value = value.slice(0,6)
+                    } else if (value.length === 10 && value[9] !== "-") {
+                      setHyphenError(
+                        "Second hyphen should be after 2 digits (e.g. 123456-78-)"
+                      );
+                      value = value.slice(0,9)
+                    }else if (value.length === 15) {
+                      setHyphenError("IC should be 14 inputs only");
+                      value = value.slice(0, 14);
+                    }  else {
+                      setHyphenError("");
+                    }
+
+                    setValue("doc_owner_ic", value, { shouldValidate: false });
                   }}
-                  className={`mt-2 block w-full rounded-md border px-3 py-2 shadow-sm outline outline-1 bg-white outline-gray-300 focus:outline-indigo-600 ${
-                    errors.doc_owner_ic ? "outline-red-500 border-red-300" : ""
+                  onBlur={() => {
+                    setHyphenError("");
+                    trigger("doc_owner_ic");
+                  }}
+                  className={`${baseInputClass} ${
+                    errors.doc_owner_ic || hyphenError
+                      ? `${errorInputClass}`
+                      : ""
                   }`}
                 />
-                {errors.doc_owner_ic && (
-                  <p className="text-sm text-red-600 mt-1">
+
+                {/* Show live hyphen error */}
+                {hyphenError && (
+                  <p className={`${errorTextClass}`}>{hyphenError}</p>
+                )}
+
+                {/* Show validation error from RHF only if no hyphen error */}
+                {errors.doc_owner_ic && !hyphenError && (
+                  <p className={`${errorTextClass}`}>
                     {errors.doc_owner_ic.message}
                   </p>
                 )}
@@ -129,8 +172,10 @@ export default function NewDocument(): React.ReactElement {
               <div className="w-1/2">
                 <label className="block mb-1 font-medium">Document Type</label>
                 <select
-                  className="w-full p-2 border rounded bg-white"
-                  {...register("doc_type")}
+                  className={`${baseInputClass} ${errors.doc_type ? errorInputClass : ""}`}
+                  {...register("doc_type", {
+                    required: "Document type is required",
+                  },)}
                 >
                   <option value="">Select Document Type</option>
                   {docType.map((type) => (
@@ -139,6 +184,10 @@ export default function NewDocument(): React.ReactElement {
                     </option>
                   ))}
                 </select>
+                {errors.doc_type && (
+              <p className={`${errorTextClass}`}>{errors.doc_type.message}</p>
+            )}
+
               </div>
             </div>
 
@@ -147,7 +196,7 @@ export default function NewDocument(): React.ReactElement {
               <input
                 type="text"
                 readOnly
-                className="w-full p-2 border rounded bg-gray-100 text-gray-500"
+                className={`${unmodifiableInputClass}`}
                 {...register("issuer_name")}
               />
             </div>
@@ -156,7 +205,8 @@ export default function NewDocument(): React.ReactElement {
               <label className="block mb-1 font-medium">Issue Date</label>
               <input
                 type="date"
-                className="w-full p-2 border rounded"
+                readOnly
+                className={`${unmodifiableInputClass}`}
                 {...register("issue_date")}
               />
             </div>
@@ -165,11 +215,12 @@ export default function NewDocument(): React.ReactElement {
               <label className="block mb-1 font-medium">Upload Document</label>
               <DropzoneUploader
                 onFileSelect={(selectedFile) => {
-                  setValue("pdf", selectedFile);
                   setFile(selectedFile);
+                  setValue("pdf", selectedFile, { shouldValidate: true });
+                  trigger("pdf");
                 }}
                 fileType={{ "application/pdf": [".pdf"] }}
-                message="Only PDF, max 1 file"
+                message="Only PDF, max 1 file, cannot be empty"
               />
             </div>
           </div>
