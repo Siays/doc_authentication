@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import axiosClient from "../services/axiosClient";
 
 export interface User {
+  id: bigint,
   email: string;
   is_super: boolean;
   first_time_login: boolean;
@@ -53,6 +54,7 @@ const fetchUser = async () => {
     });
 
     setUser({
+      id: data.account_id,
       email: data.email,
       is_super: data.is_super,
       first_time_login: data.first_time_login,

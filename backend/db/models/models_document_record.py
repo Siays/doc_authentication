@@ -5,14 +5,15 @@ import uuid
 from datetime import datetime
 from ..database import Base
 from .model_staff_system_acc import StaffSystemAcc
+from .model_owner import Owner
 
 class DocumentRecord(Base):
-    __tablename__ = "document_records"
+    __tablename__ = "document_record"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    doc_owner_name = Column(String, nullable=False) # can be useful when doing grouping
-    doc_owner_ic = Column(String, nullable=False) # can be useful when doing grouping
-    document_type = Column(String, nullable=False) # can be useful when doing grouping
+    doc_record_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    doc_owner_name = Column(String, nullable=False)  # can be useful when doing grouping
+    doc_owner_ic = Column(String, ForeignKey('owner.owner_ic_no'), nullable=False, index=True)  # can be useful when doing grouping
+    document_type = Column(String, nullable=False)  # can be useful when doing grouping
 
     # Issuer relationship
     issuer_id = Column(BigInteger, ForeignKey('staff_system_acc.account_id'), nullable=False)
