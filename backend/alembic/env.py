@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from db.database import Base
 from db.models.model_staff_system_acc import StaffSystemAcc
-from db.models.models import DocumentRecord
+from db.models.models_document_record import DocumentRecord
 from db.models.model_staff import Staff
 from db.models.model_login_session import LoginSession
 

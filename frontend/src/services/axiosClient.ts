@@ -9,6 +9,8 @@ const axiosClient = axios.create({
     // Important for cookies
     withCredentials: true
 });
+console.log("API Base URL:", import.meta.env.VITE_FAST_API_BASE_URL);
+
 
 // Response interceptor
 axiosClient.interceptors.response.use(
