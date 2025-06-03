@@ -28,3 +28,7 @@ def validate_profile_pic_ext(file: UploadFile) -> bool:
 
     return True
 
+
+def validate_name(name: str) -> bool:
+    return name.isalpha()
+

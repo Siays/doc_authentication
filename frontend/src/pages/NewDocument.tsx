@@ -44,28 +44,27 @@ export default function NewDocument(): React.ReactElement {
   });
 
   const onSubmit = async (data: FormValues) => {
-  const formData = new FormData();
-  formData.append("doc_owner_name", data.doc_owner_name);
-  formData.append("doc_owner_ic", data.doc_owner_ic);
-  formData.append("doc_type", data.doc_type);
-  formData.append("issuer_name", data.issuer_name);
-  formData.append("issue_date", data.issue_date);
-  formData.append("file", data.pdf);
-  formData.append("issuer_id", data.issuer_id.toString());
+    const formData = new FormData();
+    formData.append("doc_owner_name", data.doc_owner_name);
+    formData.append("doc_owner_ic", data.doc_owner_ic);
+    formData.append("doc_type", data.doc_type);
+    formData.append("issuer_name", data.issuer_name);
+    formData.append("issue_date", data.issue_date);
+    formData.append("file", data.pdf);
+    formData.append("issuer_id", data.issuer_id.toString());
 
-  try {
-    const response = await axiosClient.post("/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    try {
+      const response = await axiosClient.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    setDownloadUrl(response.data.download_url);
-    toast.success("File successfully processed. Ready for download.");
-  } catch (err) {
-    console.error("Upload failed", err);
-    toast.error("Failed to upload and process document.");
-  }
-};
-
+      setDownloadUrl(response.data.download_url);
+      toast.success("File successfully processed. Ready for download.");
+    } catch (err) {
+      console.error("Upload failed", err);
+      toast.error("Failed to upload and process document.");
+    }
+  };
 
   const [hyphenError, setHyphenError] = useState("");
 
@@ -288,37 +287,19 @@ export default function NewDocument(): React.ReactElement {
               </div>
 
               {downloadUrl && (
-  <a
-    href={downloadUrl}
-    className="flex flex-col items-center justify-center w-full h-[163px] border-2 border-blue-500 rounded text-blue-600 hover:bg-blue-50 transition-all"
-    // Remove the download attribute since we're handling it server-side
-  >
-    <div className="text-2xl mb-1">
-      <MdOutlineFileDownload size={25} />
-    </div>
-    <span className="mt-3 text-sm font-bold text-black">
-      Download Document
-    </span>
-  </a>
-)}
-
-{/* Optional: Add a separate view button */}
-{/* {viewUrl && (
-  <a
-    href={viewUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex flex-col items-center justify-center w-full h-[163px] border-2 border-green-500 rounded text-green-600 hover:bg-green-50 transition-all"
-  >
-    <div className="text-2xl mb-1">
-      <MdVisibility size={25} />
-    </div>
-    <span className="mt-3 text-sm font-bold text-black">
-      View Document
-    </span>
-  </a>
-)} */}
-
+                <a
+                  href={downloadUrl}
+                  className="flex flex-col items-center justify-center w-full h-[163px] border-2 border-blue-500 rounded text-blue-600 hover:bg-blue-50 transition-all"
+                  // Remove the download attribute since we're handling it server-side
+                >
+                  <div className="text-2xl mb-1">
+                    <MdOutlineFileDownload size={25} />
+                  </div>
+                  <span className="mt-3 text-sm font-bold text-black">
+                    Download Document
+                  </span>
+                </a>
+              )}
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-x-6">

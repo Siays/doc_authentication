@@ -44,20 +44,30 @@ def get_by_column(db: Session, model: Type[T], column_name: str, value: Any) -> 
     return db.query(model).filter(column_attr == value).first()
 
 
-def get_multi(db: Session, model: Type[T], skip: int = 0, limit: int = 100) -> List[T]:
+def get_multi(db: Session, model: Type[T], column_name: str,  value: Any, skip: int = 0, limit: Optional[int] = None) -> List[T]:
     """
-    Retrieve multiple records from the database with pagination.
+    Retrieve multiple records matching a specific column value, with optional pagination.
 
     Parameters:
         db (Session): SQLAlchemy database session.
-        model (Type[T]): The SQLAlchemy model class.
-        skip (int): Number of records to skip (for pagination).
-        limit (int): Maximum number of records to return.
+        model (Type[T]): SQLAlchemy model class.
+        column_name (str): Column to filter by.
+        value (Any): Value to match in that column.
+        skip (int): Records to skip.
+        limit (Optional[int]): Max records to return. If None, return all matches.
 
     Returns:
         List[T]: List of model instances.
     """
-    return db.query(model).offset(skip).limit(limit).all()
+    column_attr = getattr(model, column_name, None)
+    if not isinstance(column_attr, InstrumentedAttribute):
+        raise ValueError(f"{column_name} is not a valid column of {model.__name__}")
+
+    query = db.query(model).filter(column_attr == value).offset(skip)
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.all()
 
 def update(db: Session, db_obj: T, obj_in: Dict[str, Any]) -> T:
     """
