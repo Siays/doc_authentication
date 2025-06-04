@@ -112,7 +112,7 @@ def get_filtered_column_values(
     column: InstrumentedAttribute,
     exclude_subquery: Any,
     search: str,
-    limit: int = 10
+    limit: None
 ) -> List[str]:
     """
     Retrieve distinct values from a model's column that:
