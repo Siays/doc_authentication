@@ -188,7 +188,9 @@ export default function AuthenticateDocumentIndex(): React.ReactElement {
                     target="_blank">
                       View
                     </a>
-                    <Link to="#" className="text-blue-600 hover:underline">
+                    <Link to={`/authenticate-document/upload/${doc.doc_encrypted_id}`} 
+                    state={{ document: doc }}
+                    className="text-blue-600 hover:underline">
                       Authenticate
                     </Link>
                   </td>

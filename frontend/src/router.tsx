@@ -7,6 +7,7 @@ import NewDocument from "./pages/NewDocument";
 import CreateUser from "./pages/CreateUserPage";
 import EditDocumentIndex from "./pages/EditPages/EditDocumentIndex";
 import AuthenticateDocumentIndex from "./pages/AuthenticatePages/AuthenticateDocumentIndex";
+import AuthenticateUploadPage from "./pages/AuthenticatePages/AuthenticateUploadPage";
 import RequireSuperUser from "./components/RequireSuperUser";
 import RequireGuest from "./components/RequireGuest";
 import RequireAuth from "./components/RequireAuth";
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
       {
         path: "authenticate-document",
         element: <AuthenticateDocumentIndex />,
+      },
+      {
+        path: "authenticate-document/upload/:doc_encrypted_id",
+        element: <AuthenticateUploadPage />,
       },
       {
         path: "create-user", // accesible only by super user
