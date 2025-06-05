@@ -71,13 +71,7 @@ export default function HomePage() {
         <div className="w-full md:w-3/4">
           <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Recent list</h2>
-          <div className="flex items-center">
-          <span>Filter</span>
-            <button className="px-4 py-2 text-blue-600 rounded hover:bg-blue-300 transition-colors">
-              <FaFilter size={16}/>
-            </button>
-            
-          </div>
+          
           </div>
           <div className="overflow-x-auto border rounded-md">
             <table className="min-w-full text-left border-collapse">
