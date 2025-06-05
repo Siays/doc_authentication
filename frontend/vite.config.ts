@@ -1,36 +1,37 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+/// <reference types="node" />
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite'
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), tailwindcss(),],
-  server: {
-    open: '/', // explicitly opens the root in browser
-    proxy: {
-      '/static': {
-        target: 'http://127.0.0.1:8050',
-        changeOrigin: true,
-      },
-      '/download': {
-        target: 'http://127.0.0.1:8050',
-        changeOrigin: true,
-      },
-      '/view': {
-        target: 'http://127.0.0.1:8050',
-        changeOrigin: true,
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+
+  const baseURL = env.VITE_FAST_API_BASE_URL;
+
+  return {
+    plugins: [react(),
+      tailwindcss(),
+    ],
+    server: {
+      open: '/',
+      proxy: {
+        '/static': {
+          target: baseURL,
+          changeOrigin: true,
+        },
+        '/download': {
+          target: baseURL,
+          changeOrigin: true,
+        },
+        '/view': {
+          target: baseURL,
+          changeOrigin: true,
+        },
+        '/profile-pics': {
+          target: baseURL,
+          changeOrigin: true,
+        },
       },
     },
-  },
-  optimizeDeps: {
-    include: ['pdfjs-dist']
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'pdfjs-dist': ['pdfjs-dist']
-        }
-      }
-    }
-  },
-})
+  };
+});
