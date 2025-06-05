@@ -1,6 +1,6 @@
 import { usePageTitles } from "../../hooks/usePageTitle";
 import { MdSearch } from "react-icons/md";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 import ReactPaginate from "react-paginate";
 import axiosClient from "../../services/axiosClient";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 interface DocumentRecord {
   doc_record_id: string;
-  doc_encrypted_id: string,
+  doc_encrypted_id: string;
   doc_owner_name: string;
   doc_owner_ic: string;
   document_type: string;
@@ -29,6 +29,14 @@ export default function AuthenticateDocumentIndex(): React.ReactElement {
   const [icError, setIcError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+
+  const currentItems = useMemo(() => {
+    const start = currentPage * itemsPerPage;
+    return documents.slice(start, start + itemsPerPage);
+  }, [currentPage, documents]);
+
   const isValidIC = (ic: string) => {
     return /^\d{6}-\d{2}-\d{4}$/.test(ic);
   };
@@ -41,6 +49,7 @@ export default function AuthenticateDocumentIndex(): React.ReactElement {
       });
 
       setDocuments(response.data);
+      setCurrentPage(0);
     } catch (err) {
       console.log(err);
       if (axios.isAxiosError(err)) {
@@ -49,7 +58,6 @@ export default function AuthenticateDocumentIndex(): React.ReactElement {
       } else {
         toast.error("An unexpected error occurred.");
       }
-
     } finally {
       setIsLoading(false);
     }
@@ -160,46 +168,70 @@ export default function AuthenticateDocumentIndex(): React.ReactElement {
         </div>
 
         {/* Table */}
-        {documents.length > 0 && (<div className="overflow-x-auto border rounded-md">
-          <table className="min-w-full text-left border-collapse">
-            <thead>
-              <tr>
-                <th className="p-3">Doc Type</th>
-                <th className="p-3">Owner Name</th>
-                <th className="p-3">Owner IC</th>
-                <th className="p-3">Uploaded By</th>
-                <th className="p-3">Uploaded Time</th>
-                <th className="p-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map((doc, index) => (
-                <tr
-                  key={doc.doc_record_id}
-                  className={index % 2 === 0 ? "bg-white" : "bg-blue-50"}
-                >
-                  <td className="p-3">{doc.document_type}</td>
-                  <td className="p-3 ">{doc.doc_owner_name}</td>
-                  <td className="p-3 ">{doc.doc_owner_ic}</td>
-                  <td className="p-3 ">{doc.issuer_name}</td>
-                  <td className="p-3 ">{doc.issue_date}</td>
-                  <td className="p-3 space-x-10">
-                    <a href={`/view/${doc.doc_encrypted_id}`} className="text-blue-600 hover:underline ml-5"
-                    target="_blank">
-                      View
-                    </a>
-                    <Link to={`/authenticate-document/upload/${doc.doc_encrypted_id}`} 
-                    state={{ document: doc }}
-                    className="text-blue-600 hover:underline">
-                      Authenticate
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>)}
-        
+        {documents.length > 0 && (
+          <>
+            <div className="overflow-x-auto border rounded-md">
+              <table className="min-w-full text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th className="p-3">Doc Type</th>
+                    <th className="p-3">Owner Name</th>
+                    <th className="p-3">Owner IC</th>
+                    <th className="p-3">Uploaded By</th>
+                    <th className="p-3">Uploaded Time</th>
+                    <th className="p-3 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((doc, index) => (
+                    <tr
+                      key={doc.doc_record_id}
+                      className={index % 2 === 0 ? "bg-white" : "bg-blue-50"}
+                    >
+                      <td className="p-3">{doc.document_type}</td>
+                      <td className="p-3 ">{doc.doc_owner_name}</td>
+                      <td className="p-3 ">{doc.doc_owner_ic}</td>
+                      <td className="p-3 ">{doc.issuer_name}</td>
+                      <td className="p-3 ">{doc.issue_date}</td>
+                      <td className="p-3 space-x-10">
+                        <a
+                          href={`/view/${doc.doc_encrypted_id}`}
+                          className="text-blue-600 hover:underline ml-5"
+                          target="_blank"
+                        >
+                          View
+                        </a>
+                        <Link
+                          to={`/authenticate-document/upload/${doc.doc_encrypted_id}`}
+                          state={{ document: doc }}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Authenticate
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex justify-center mt-4">
+              <ReactPaginate
+                previousLabel={"← Prev"}
+                nextLabel={"Next →"}
+                pageCount={Math.ceil(documents.length / itemsPerPage)}
+                onPageChange={({ selected }) => setCurrentPage(selected)}
+                containerClassName="flex items-center space-x-2"
+                pageClassName="px-3 py-1 border rounded cursor-pointer"
+                activeClassName="bg-blue-500 text-white"
+                previousClassName="px-3 py-1 border rounded cursor-pointer"
+                nextClassName="px-3 py-1 border rounded cursor-pointer"
+                disabledClassName="opacity-50 cursor-not-allowed"
+              />
+            </div>
+          </>
+        )}
 
         {/* Back button */}
         <div className="mt-6 flex justify-end">

@@ -29,8 +29,15 @@ export default function AuthenticatedLayout() {
   const { user, logout } = useAuth();
 
   const baseURL = import.meta.env.VITE_FAST_API_BASE_URL;
+  {/*
+  Appending a timestamp to force the browser to reload the latest version of the
+  profile picture rather than using a cached one. This is needed because when a user
+  uploads a new profile picture, it replaces the old one at the same URL.
+  Without the timestamp, the browser may continue using the cached version,
+  causing the user to see the old picture.
+  */}
   const profilePictureURL = user?.profile_picture
-  ? `${baseURL}${user.profile_picture}?t=${new Date().getTime()}`
+  ? `${user.profile_picture}?t=${new Date().getTime()}`
   : null;
 
   
