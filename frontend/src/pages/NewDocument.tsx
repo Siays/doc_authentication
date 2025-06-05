@@ -31,7 +31,7 @@ export default function NewDocument(): React.ReactElement {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
-  const docType = ["IC", "BRG_PENGSESAHAN_BRN"];
+  const docType = ["IC", "BRG_PENGESAHAN_BRN"];
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
