@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from pathlib import Path
 from fastapi import APIRouter, Form, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -88,12 +88,35 @@ def get_user(request: Request, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
+    profile_picture = user.profile_img
+    if profile_picture:
+        filepath = Path("uploads/users_profile_pic") / Path(profile_picture).name
+        """
+        Appending a timestamp to force the browser to reload the latest version of the
+        profile picture rather than using a cached one. This is needed because when a user
+        uploads a new profile picture, it replaces the old one at the same URL.
+        Without the timestamp, the browser may continue using the cached version,
+        causing the user to see the old picture.
+        
+        const profilePictureURL = user?.profile_picture
+            ? `${user.profile_picture}?t=${new Date().getTime()}`
+            : null;
+        
+        This was previously done in the frontend, however if it is done in frontend, on every navigation
+        to other route, it keep repeatedly fetch the profile pic, can cause inefficient below:
+            1. Unnecessary Network Traffic
+            2. Increased Backend Load 
+            3. Memory & Resource Waste in Browser
+        """
+        version = int(filepath.stat().st_mtime) if filepath.exists() else 0
+        profile_picture = f"{profile_picture}?v={version}"
+
     return {
         "account_id": user.account_id,
         "first_time_login":user.first_time_login,
         "email": user.email,
         "account_holder_name": user.account_holder_name,
-        "profile_picture": user.profile_img,
+        "profile_picture": profile_picture,
         "is_super": user.is_super
     }
 
