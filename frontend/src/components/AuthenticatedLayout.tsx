@@ -23,24 +23,24 @@ function classNames(...classes: (string | false | null | undefined)[]): string {
 }
 
 // for menu styling
-const dropdownItemClass = "block w-full px-4 py-2 text-sm text-left text-gray-700";
+const dropdownItemClass =
+  "block w-full px-4 py-2 text-sm text-left text-gray-700";
 
 export default function AuthenticatedLayout() {
   const { user, logout } = useAuth();
 
-  const baseURL = import.meta.env.VITE_FAST_API_BASE_URL;
-  {/*
+  {
+    /*
   Appending a timestamp to force the browser to reload the latest version of the
   profile picture rather than using a cached one. This is needed because when a user
   uploads a new profile picture, it replaces the old one at the same URL.
   Without the timestamp, the browser may continue using the cached version,
   causing the user to see the old picture.
-  */}
+  */
+  }
   const profilePictureURL = user?.profile_picture
-  ? `${user.profile_picture}?t=${new Date().getTime()}`
-  : null;
-
-  
+    ? `${user.profile_picture}`
+    : null;
 
   const navigation = [
     { name: "Home", to: "/home-page" },
@@ -115,26 +115,29 @@ export default function AuthenticatedLayout() {
                         transition
                         className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                       >
-                          {userNavigation.map((item) => (
-    <MenuItem key={item.name}>
-      {({ active }) => {
-        const itemClasses = classNames(
-          active ? "bg-gray-100" : "",
-          dropdownItemClass
-        );
+                        {userNavigation.map((item) => (
+                          <MenuItem key={item.name}>
+                            {({ active }) => {
+                              const itemClasses = classNames(
+                                active ? "bg-gray-100" : "",
+                                dropdownItemClass
+                              );
 
-        return item.name === "Sign out" ? (
-          <button onClick={logout} className={itemClasses}>
-            {item.name}
-          </button>
-        ) : (
-          <NavLink to={item.to!} className={itemClasses}>
-            {item.name}
-          </NavLink>
-        );
-      }}
-    </MenuItem>
-  ))}
+                              return item.name === "Sign out" ? (
+                                <button
+                                  onClick={logout}
+                                  className={itemClasses}
+                                >
+                                  {item.name}
+                                </button>
+                              ) : (
+                                <NavLink to={item.to!} className={itemClasses}>
+                                  {item.name}
+                                </NavLink>
+                              );
+                            }}
+                          </MenuItem>
+                        ))}
                       </MenuItems>
                     </Menu>
                     <div className="ml-4 flex flex-col items-start text-left leading-tight text-white min-w-0">
@@ -185,7 +188,11 @@ export default function AuthenticatedLayout() {
               <div className="border-t border-gray-700 pt-4 pb-3">
                 <div className="flex items-center px-5">
                   <div className="shrink-0">
-                    <img alt="Profile Picture" src={profilePictureURL || "#"} className="size-10 rounded-full" />
+                    <img
+                      alt="Profile Picture"
+                      src={profilePictureURL || "#"}
+                      className="size-10 rounded-full"
+                    />
                   </div>
                   <div className="ml-3">
                     <div className="text-base/5 font-medium text-white">
