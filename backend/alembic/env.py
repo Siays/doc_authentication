@@ -12,10 +12,12 @@ from db.models.model_staff_system_acc import StaffSystemAcc
 from db.models.models_document_record import DocumentRecord
 from db.models.model_staff import Staff
 from db.models.model_login_session import LoginSession
+from db.models.model_notification import Notification
+from db.models.model_notified_user import NotifiedUser
 
 # Load environment variables
-# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# load_dotenv(os.path.join(BASE_DIR, ".env"))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
