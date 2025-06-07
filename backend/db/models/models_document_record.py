@@ -27,7 +27,7 @@ class DocumentRecord(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # soft delete
-    is_deleted = Column(Boolean, nullable=True)
+    is_deleted = Column(Boolean, default=False)
     deleted_by = Column(BigInteger, ForeignKey('staff_system_acc.account_id'), nullable=True)
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
