@@ -23,7 +23,7 @@ type FormValues = {
   issuer_name: string;
   issue_date: string;
   pdf: File;
-  issuer_id: bigint;
+  issuer_id: string;
 };
 
 export default function NewDocument(): React.ReactElement {

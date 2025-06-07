@@ -56,23 +56,22 @@ export default function EditDocumentIndex(): React.ReactElement {
         title="Edit Document - Main"
         tabTitle="Edit Document Main"
         actionRender={(doc) => (
-          <>
+          <div className="flex items-center space-x-4">
             <Link
-              className="text-blue-600 hover:underline ml-5"
+              className="text-blue-600 hover:underline"
               to={`/authenticate-document/upload/${doc.doc_encrypted_id}`}
               state={{ document: doc }}
             >
               Edit
             </Link>
-
             <button
               onClick={() => handleDelete(doc)}
-              className="text-blue-600 hover:underline ml-5"
+              className="text-blue-600 hover:underline"
             >
               Delete
             </button>
-          </>
-        )}
+          </div>
+        )}        
       />
 
       {/* Modal */}

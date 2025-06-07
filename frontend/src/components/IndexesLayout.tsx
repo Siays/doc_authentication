@@ -23,6 +23,7 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
     const [icError, setIcError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
   
+    const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 10;
   
@@ -30,15 +31,19 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
       return /^\d{6}-\d{2}-\d{4}$/.test(ic);
     };
   
-    const fetchDocList = async () => {
+    const fetchDocList = async (page = 0) => {
       setIsLoading(true);
       try {
         const response = await axiosClient.get("/get-document", {
-          params: { owner_ic: docOwnerIC, doc_type: docType },
+          // continue to add pagination
+          params: { owner_ic: docOwnerIC, doc_type: docType,
+            page: page, limit: itemsPerPage
+           },
         });
   
-        setDocuments(response.data);
-        setCurrentPage(0);
+        setDocuments(response.data.documents);
+        setTotal(response.data.total);
+        setCurrentPage(page);
       } catch (err) {
         console.log(err);
         if (axios.isAxiosError(err)) {
@@ -140,7 +145,7 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
             {/* Search Button */}
             <div className="flex items-center pt-6">
               <button
-                onClick={fetchDocList}
+                onClick={() => fetchDocList(0)}
                 disabled={!isValidIC(docOwnerIC)}
                 className={`${
                   !isValidIC(docOwnerIC) ? "opacity-50 cursor-not-allowed" : ""
@@ -162,8 +167,12 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
               documents={documents}
               currentPage={currentPage}
               itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                fetchDocList(page);
+              }}
               actions={actionRender}
+              total={total}
             />
           )}
   
