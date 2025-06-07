@@ -1,31 +1,108 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import IndexesLayout from "../../components/IndexesLayout";
+import axiosClient from "../../services/axiosClient";
+import { toast } from "react-toastify";
+import { useAuth } from "../../hooks/useAuth";
+
+interface Document {
+  doc_encrypted_id: string;
+  // define an object(DocumentRecord in this case) that may have unknown or dynamic properties
+  [key: string]: any;
+}
 
 export default function EditDocumentIndex(): React.ReactElement {
-  return (
-    <IndexesLayout
-      title="Edit Document - Main"
-      tabTitle="Edit Document Main"
-      actionRender={(doc) => (
-        <>        
-          <Link
-            className="text-blue-600 hover:underline ml-5"
-            to={`/authenticate-document/upload/${doc.doc_encrypted_id}`}
-            state={{ document: doc }}
-          >
-            Edit
-          </Link>
+  const { user } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
-          <a
-            href={`/view/${doc.doc_encrypted_id}`}
-            target="_blank"
-            className="text-blue-600 hover:underline ml-5"
-          >
-            Delete
-          </a>
-        </>
+  const handleDelete = (doc: Document) => {
+    setSelectedDocument(doc);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (selectedDocument) {
+      setIsLoading(true);
+      try {
+        const response = await axiosClient.delete(
+          `/delete/${selectedDocument.doc_encrypted_id}`,
+          {
+            params: {
+              encrypted_id: selectedDocument.doc_encrypted_id,
+              acc_id: user!.id,
+            },
+          }
+        );
+        console.log(response);
+
+        toast.success("Document deleted, notification sent to super user");
+        setShowModal(false);
+        setSelectedDocument(null);
+      } catch (err) {
+        toast.error("Failed to delete document");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      <IndexesLayout
+        title="Edit Document - Main"
+        tabTitle="Edit Document Main"
+        actionRender={(doc) => (
+          <>
+            <Link
+              className="text-blue-600 hover:underline ml-5"
+              to={`/authenticate-document/upload/${doc.doc_encrypted_id}`}
+              state={{ document: doc }}
+            >
+              Edit
+            </Link>
+
+            <button
+              onClick={() => handleDelete(doc)}
+              className="text-blue-600 hover:underline ml-5"
+            >
+              Delete
+            </button>
+          </>
+        )}
+      />
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+            <p className="mb-6">
+              Are you sure you want to delete this document? This action cannot
+              be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded"
+                disabled={isLoading}
+              >
+                {isLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    />
+    </>
   );
 }

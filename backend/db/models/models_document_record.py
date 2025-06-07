@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, DateTime, LargeBinary, ForeignKey, BigInteger, Index
+from sqlalchemy import Column, String, Date, DateTime, LargeBinary, ForeignKey, BigInteger, Index, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -23,11 +23,18 @@ class DocumentRecord(Base):
     hash = Column(LargeBinary, nullable=False)
     signature = Column(LargeBinary, nullable=False)
     verification_url = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    issuer = relationship("StaffSystemAcc")
+    # soft delete
+    is_deleted = Column(Boolean, nullable=True)
+    deleted_by = Column(BigInteger, ForeignKey('staff_system_acc.account_id'), nullable=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+    issuer = relationship("StaffSystemAcc", foreign_keys=[issuer_id])
+    deleted_by_user = relationship("StaffSystemAcc", foreign_keys=[deleted_by])
 
     __table_args__ = (
         Index("ix_document_records_doc_owner", "doc_owner_name", "doc_owner_ic"),
+        Index("ix_document_record_is_deleted", "is_deleted"),
     )
