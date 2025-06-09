@@ -159,6 +159,7 @@ export default function CreateUser(): React.ReactElement {
               value={form.values.password}
               onChange={(e) => form.handleChange("password", e.target.value)}
               className={inputClass}
+              autoComplete="new-password"
             />
             {form.errors.password && (
               <p className="text-sm text-red-600 mt-1">{form.errors.password}</p>
@@ -181,6 +182,7 @@ export default function CreateUser(): React.ReactElement {
                 )
               }
               className={inputClass}
+              autoComplete="new-password"
             />
             {form.errors.confirmPassword && (
               <p className="text-sm text-red-600 mt-1">{form.errors.confirmPassword}</p>

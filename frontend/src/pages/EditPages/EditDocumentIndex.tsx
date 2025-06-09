@@ -66,7 +66,7 @@ export default function EditDocumentIndex(): React.ReactElement {
           <div className="flex items-center space-x-4">
             <Link
               className="text-blue-600 hover:underline"
-              to={`/authenticate-document/upload/${doc.doc_encrypted_id}`}
+              to={`/edit-document/edit/${doc.doc_encrypted_id}`}
               state={{ document: doc }}
             >
               Edit

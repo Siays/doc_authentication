@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePageTitles } from "../hooks/usePageTitle";
 import { FaPlus, FaEdit , FaFilter} from "react-icons/fa";
 import { MdOutlineDocumentScanner  } from "react-icons/md";
@@ -25,6 +25,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const [recentDocs, setRecentDocs] = useState<DocumentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const hasFetched = useRef(false);
 
   const fetchRecentDocs = async () => {
     setIsLoading(true);
@@ -46,9 +47,12 @@ export default function HomePage() {
     }
   }
 
-  useEffect(()=> { 
+  useEffect(() => {
+    if (!user?.id || hasFetched.current) return;
+    hasFetched.current = true;
     fetchRecentDocs();
-  },[user!.id])
+  }, [user]);
+  
 
   return (
     <>
