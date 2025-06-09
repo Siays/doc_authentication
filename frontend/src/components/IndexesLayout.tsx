@@ -11,7 +11,7 @@ import { usePageTitles } from "../hooks/usePageTitle";
 interface IndexesLayoutProps {
   title: string;
   tabTitle: string;
-  actionRender: (doc: DocumentRecord) => React.ReactNode;
+  actionRender: (doc: DocumentRecord, refreshDocuments?: () => void) => React.ReactNode;
 }
 
 const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRender }) => {
@@ -31,19 +31,47 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
       return /^\d{6}-\d{2}-\d{4}$/.test(ic);
     };
   
-    const fetchDocList = async (page = 0) => {
+    const fetchDocList = async (page = currentPage) => {
+      // Only fetch if we have a valid IC and have performed at least one search
+      if (!isValidIC(docOwnerIC)) return;
+      
       setIsLoading(true);
       try {
         const response = await axiosClient.get("/get-document", {
-          // continue to add pagination
-          params: { owner_ic: docOwnerIC, doc_type: docType,
-            page: page, limit: itemsPerPage
-           },
+          params: { 
+            owner_ic: docOwnerIC, 
+            doc_type: docType,
+            page: page, 
+            limit: itemsPerPage
+          },
         });
-  
-        setDocuments(response.data.documents);
-        setTotal(response.data.total);
-        setCurrentPage(page);
+
+        const { documents: fetchedDocs, total: fetchedTotal } = response.data;
+        
+        // Check if current page is empty but there are documents available
+        if (fetchedDocs.length === 0 && fetchedTotal > 0 && page > 0) {
+          // Calculate the last valid page (0-indexed)
+          const lastValidPage = Math.max(0, Math.ceil(fetchedTotal / itemsPerPage) - 1);
+          
+          // Fetch the last valid page instead
+          const fallbackResponse = await axiosClient.get("/get-document", {
+            params: { 
+              owner_ic: docOwnerIC, 
+              doc_type: docType,
+              page: lastValidPage, 
+              limit: itemsPerPage
+            },
+          });
+          
+          setDocuments(fallbackResponse.data.documents);
+          setTotal(fallbackResponse.data.total);
+          setCurrentPage(lastValidPage);
+        } else {
+          // Normal case - use the fetched data
+          setDocuments(fetchedDocs);
+          setTotal(fetchedTotal);
+          setCurrentPage(page);
+        }
       } catch (err) {
         console.log(err);
         if (axios.isAxiosError(err)) {
@@ -54,6 +82,12 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
         }
       } finally {
         setIsLoading(false);
+      }
+    };
+
+    const refreshDocuments = () => {
+      if (documents.length > 0) {
+        fetchDocList();
       }
     };
   
@@ -171,7 +205,7 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
                 setCurrentPage(page);
                 fetchDocList(page);
               }}
-              actions={actionRender}
+              actions={(doc) => actionRender(doc, refreshDocuments)}
               total={total}
             />
           )}

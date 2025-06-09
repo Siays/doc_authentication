@@ -41,7 +41,7 @@ def create_user(
         "password_hash": result["hash"],
         "last_login_at": datetime.utcnow(),
         "is_super": is_super,
-        "temp_password": True
+        "first_time_login": True
     }
 
     new_account = create(db, StaffSystemAcc, record_data)

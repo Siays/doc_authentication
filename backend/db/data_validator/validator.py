@@ -5,12 +5,15 @@ from pathlib import Path
 
 def validate_email(email: str) -> bool:
     try:
-        valid = email_validator(email)
-        if not valid.normalized.endswith("@example.com"):
-            raise ValueError()
-    except (EmailNotValidError, ValueError):
+        # check_deverability=False since example.com has no MX records
+        valid = email_validator(email,  check_deliverability=False)
+        normalized = valid.normalized.lower()
+        print("Normalized email:", normalized)
+        if not normalized.endswith("@example.com"):
+            raise ValueError("Email must end with @example.com")
+    except (EmailNotValidError, ValueError) as e:
+        print("Validation failed:", repr(e))
         raise HTTPException(status_code=400, detail="Invalid email. Must end with '@example.com'.")
-
     return True
 
 

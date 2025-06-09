@@ -54,7 +54,7 @@ const fetchUser = async () => {
     });
 
     setUser({
-      id: data.account_id.toString(),
+      id: data.account_id,
       email: data.email,
       is_super: data.is_super,
       first_time_login: data.first_time_login,

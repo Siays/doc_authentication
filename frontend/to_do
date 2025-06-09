@@ -1,3 +1,7 @@
+notification list
+
+
+
 1. notification bell  (authenticated layout)
 2. on user clicked delete, prompt a confirmation message, if user confirm, delete the rec, send the rec to trasheddoc and send notification to superuser
 3. edit doc page 
