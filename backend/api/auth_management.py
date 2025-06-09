@@ -111,6 +111,8 @@ def get_user(request: Request, db: Session = Depends(get_db)):
         version = int(filepath.stat().st_mtime) if filepath.exists() else 0
         profile_picture = f"{profile_picture}?v={version}"
 
+
+
     return {
         "account_id": user.account_id,
         "first_time_login":user.first_time_login,

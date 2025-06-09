@@ -18,9 +18,11 @@ export default function EditDocumentIndex(): React.ReactElement {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [currentRefreshFunction, setCurrentRefreshFunction] = useState<(() => void) | null>(null);
 
-  const handleDelete = (doc: Document) => {
+  const handleDelete = (doc: Document, refreshFn?: () => void) => {
     setSelectedDocument(doc);
+    setCurrentRefreshFunction(refreshFn ? () => refreshFn : null);
     setShowModal(true);
   };
 
@@ -32,7 +34,6 @@ export default function EditDocumentIndex(): React.ReactElement {
           `/delete/${selectedDocument.doc_encrypted_id}`,
           {
             params: {
-              encrypted_id: selectedDocument.doc_encrypted_id,
               acc_id: user!.id,
             },
           }
@@ -42,10 +43,16 @@ export default function EditDocumentIndex(): React.ReactElement {
         toast.success("Document deleted, notification sent to super user");
         setShowModal(false);
         setSelectedDocument(null);
+        
+        // Refresh the document list with the current refresh function
+        if (currentRefreshFunction) {
+          currentRefreshFunction();
+        }
       } catch (err) {
         toast.error("Failed to delete document");
       } finally {
         setIsLoading(false);
+        setCurrentRefreshFunction(null);
       }
     }
   };
@@ -55,7 +62,7 @@ export default function EditDocumentIndex(): React.ReactElement {
       <IndexesLayout
         title="Edit Document - Main"
         tabTitle="Edit Document Main"
-        actionRender={(doc) => (
+        actionRender={(doc, refreshDocuments) => (
           <div className="flex items-center space-x-4">
             <Link
               className="text-blue-600 hover:underline"
@@ -65,7 +72,7 @@ export default function EditDocumentIndex(): React.ReactElement {
               Edit
             </Link>
             <button
-              onClick={() => handleDelete(doc)}
+              onClick={() => handleDelete(doc, refreshDocuments)}
               className="text-blue-600 hover:underline"
             >
               Delete

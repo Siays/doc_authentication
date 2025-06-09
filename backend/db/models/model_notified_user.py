@@ -9,5 +9,7 @@ class NotifiedUser(Base):
     notified_id = Column(BigInteger, primary_key=True, autoincrement=True)
     account_id = Column(BigInteger, ForeignKey('staff_system_acc.account_id'), nullable=False)
     notification_id = Column(BigInteger, ForeignKey('notification.notification_id'), nullable=False)
+    has_received = Column(Boolean, default=False)
+    received_at = Column(DateTime(timezone=True), nullable=True)
     has_read = Column(Boolean, default=False)
-    notified_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+

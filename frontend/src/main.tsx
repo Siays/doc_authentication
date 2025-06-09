@@ -8,6 +8,7 @@ import LoadingScreen from './components/LoadingScreen.tsx'
 import { useAuth } from './hooks/useAuth.ts'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { NotificationProvider } from './context/NotificationContext.tsx'
 
 function App() {
   const [showGate, setShowGate] = useState(false);
@@ -35,7 +36,9 @@ function AppWrapper(){
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
+      <NotificationProvider>
       <App />
+      </NotificationProvider>
     </AuthProvider>
   </StrictMode>,
 )

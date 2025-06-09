@@ -70,7 +70,11 @@ export default function CreateUser(): React.ReactElement {
     formData.append("is_super", (form.values.permission === "Super").toString());
 
     try {
-      await axiosClient.post("/create-user", formData);
+      await axiosClient.post("/create-user", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       form.reset();
       toast.success("User created successfully", { autoClose: 3000 });
       navigate("/home-page");
