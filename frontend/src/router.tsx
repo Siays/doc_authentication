@@ -13,6 +13,7 @@ import RequireGuest from "./components/RequireGuest";
 import RequireAuth from "./components/RequireAuth";
 import ModifyUserPage from "./pages/ModifyUserPage";
 import RootRedirect from "./components/RootRedirect";
+import EditDocument from "./pages/EditPages/EditDocument";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
       {
         path: "edit-document",
         element: <EditDocumentIndex />,
+      },
+      {
+        path: "edit-document/edit/:doc_encrypted_id",
+        element: <EditDocument />,
       },
       {
         path: "authenticate-document",

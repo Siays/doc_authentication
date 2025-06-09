@@ -30,7 +30,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   
-  
+    
 
   useEffect(() => {
     if (!user?.id) {

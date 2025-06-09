@@ -1,5 +1,13 @@
-notification list
+edit page, if the fields has no changes, disable comfirm button
+1. what if the user editted but input same thing?
+2. add a modal / checkbox to inform user upon confirmation the issuer name and id will changed to current logged in
+3. specifically check which fields are changed. 
 
+
+
+notification list
+currently: from old to new
+the latest delete without refresh, appear to be error in notification
 
 
 1. notification bell  (authenticated layout)

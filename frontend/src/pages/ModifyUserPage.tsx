@@ -305,6 +305,7 @@ export default function ModifyUserPage() {
               </label>
               <input
                 type="password"
+                autoComplete = "current-password"
                 {...register("oldPassword", {
                   validate: (val) => {
                     const { password, confirmPassword } = getValues();
@@ -348,6 +349,7 @@ export default function ModifyUserPage() {
               </label>
               <input
                 type="password"
+                autoComplete = "new-password"
                 {...register("password", {
                   minLength: { value: 5, message: "Minimum 5 characters" },
                   validate: (val) => {
@@ -377,6 +379,7 @@ export default function ModifyUserPage() {
               </label>
               <input
                 type="password"
+                autoComplete = "new-password"
                 {...register("confirmPassword", {
                   validate: (val) => {
                     const { oldPassword, password } = getValues();
