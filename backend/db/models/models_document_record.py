@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, DateTime, LargeBinary, ForeignKey, BigInteger, Index, Boolean
+from sqlalchemy import Column, String, Date, DateTime, LargeBinary, ForeignKey, BigInteger, Index, Boolean, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -23,8 +23,8 @@ class DocumentRecord(Base):
     hash = Column(LargeBinary, nullable=False)
     signature = Column(LargeBinary, nullable=False)
     verification_url = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
     # soft delete
     is_deleted = Column(Boolean, default=False)

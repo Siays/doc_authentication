@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, BigInteger, Boolean
+from sqlalchemy import Column, DateTime, ForeignKey, BigInteger, Boolean, func
 from datetime import datetime
 from ..database import Base
 
@@ -11,5 +11,5 @@ class NotifiedUser(Base):
     notification_id = Column(BigInteger, ForeignKey('notification.notification_id'), nullable=False)
     has_received = Column(Boolean, default=False)
     received_at = Column(DateTime(timezone=True), nullable=True)
-    has_read = Column(Boolean, default=False)
+    has_read = Column(Boolean, default=False, nullable=True)
 

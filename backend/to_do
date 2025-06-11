@@ -1,3 +1,16 @@
+deleted doesn't trigger soft_delete_conflict
+
+
+
+- modify user (currently post, need put?)
+
+
+QR contentsinc
+
+
+
+
+
 - notification ( with web socket )
 - delete doc
 - edit doc
