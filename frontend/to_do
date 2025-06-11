@@ -1,3 +1,11 @@
+if success proceed to update edit
+if failed : 1. soft_delete_conflict, prompt comfirmation before continue
+            2. conflict, stop the user from proceed
+
+
+edit page , new document and authenticatedocindex, editdocindex  ic validation
+
+
 edit page, if the fields has no changes, disable comfirm button
 1. what if the user editted but input same thing?
 2. add a modal / checkbox to inform user upon confirmation the issuer name and id will changed to current logged in

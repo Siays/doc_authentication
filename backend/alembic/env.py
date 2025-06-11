@@ -14,6 +14,7 @@ from db.models.model_staff import Staff
 from db.models.model_login_session import LoginSession
 from db.models.model_notification import Notification
 from db.models.model_notified_user import NotifiedUser
+from db.models.model_deleted_document import DeletedDocument
 
 # Load environment variables
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

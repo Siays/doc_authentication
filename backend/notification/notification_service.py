@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
 from .websocket_manager import manager
@@ -68,7 +69,7 @@ async def _send_and_mark_received(ws: WebSocket, account_id: int, notification: 
             notification_id=notification.notification_id
         ).update({
             "has_received": True,
-            "received_at": datetime.utcnow()
+            "received_at": datetime.now(ZoneInfo("Asia/Kuala_Lumpur"))
         })
 
         db.commit()
@@ -98,7 +99,7 @@ async def send_undelivered_notifications(user_id: int):
             db.query(NotifiedUser).filter_by(
                 notified_id=notified_user.notified_id
             ).update({"has_received": True,
-                      "received_at": datetime.utcnow()})
+                      "received_at": datetime.now(ZoneInfo("Asia/Kuala_Lumpur"))})
         db.commit()
     finally:
         db.close()

@@ -32,7 +32,6 @@ def login(email: str = Form(...),
     record_data = {
         "account_id": user.account_id,
         "session_token":session_token,
-        "created_at": datetime.utcnow()
     }
 
     print("Input password:", password)

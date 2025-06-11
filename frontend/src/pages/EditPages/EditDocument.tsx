@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosClient from "../../services/axiosClient";
 import { toast } from "react-toastify";
-import { MdOutlineFileDownload } from "react-icons/md";
+
 import axios from "axios";
 import {
   baseInputClass,
@@ -18,65 +18,146 @@ type FormValues = {
   email: string;
   doc_owner_name: string;
   doc_owner_ic: string;
-  doc_type: string;
+  document_type: string;
   issuer_name: string;
   issue_date: string;
-  pdf: File;
   issuer_id: string;
 };
 
 export default function EditDocument(): React.ReactElement {
   usePageTitles("Edit Document", "Edit Document Page");
-  
+  const { user } = useAuth();
+
   const {
     register,
     handleSubmit,
     trigger,
     setValue,
-    formState: { errors, dirtyFields },
+    watch,
+    getValues,
+    formState: { errors },
   } = useForm<FormValues>({
     mode: "onTouched",
   });
 
   const location = useLocation();
   const { document } = location.state || {};
-  console.log("Document details: ", document)
   const navigate = useNavigate();
   const docType = ["IC", "BRG_PENGESAHAN_BRN"];
   const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [pendingData, setPendingData] = useState<Partial<FormValues> | null>(
+    null
+  );
+  const watchedValues = watch([
+    "doc_owner_name",
+    "doc_owner_ic",
+    "document_type",
+  ]);
 
-  // check if any of the 3 fields are being modified
-  const isSpecifiedFieldsModified =
-  !!(dirtyFields.doc_owner_name ||
-     dirtyFields.doc_owner_ic ||
-     dirtyFields.doc_type);
+  const getChangedFields = () => {
+    const currentValues = getValues();
+    const changedFields: Partial<FormValues> = {};
 
-  
+    const editableKeys: (keyof FormValues)[] = [
+      "doc_owner_name",
+      "doc_owner_ic",
+      "document_type",
+    ];
+
+    for (const key of editableKeys) {
+      const currentValue = currentValues[key];
+      const originalValue = document?.[key as keyof typeof document];
+
+      if (currentValue !== originalValue) {
+        changedFields[key] = currentValue;
+      }
+    }
+
+    return changedFields;
+  };
+
   const onSubmit = async () => {
-    
+    const changedData = getChangedFields();
+
     try {
       setIsLoading(true);
-      const response = await axiosClient.post("/upload", {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      
-      toast.success("File successfully processed. Ready for download.");
+      await axiosClient.post(
+        `/check-conflict/${document.doc_encrypted_id}`,
+        changedData
+      );
+
+      await axiosClient.patch(
+        `/edit/${document.doc_encrypted_id}`,
+        changedData,
+        {
+          params: { account_id: user?.id },
+        }
+      );
+
+      toast.success("Document record update successfully.");
+
+      if (changedData.doc_owner_name) {
+        setValue("doc_owner_name", changedData.doc_owner_name);
+      }
+      if (changedData.doc_owner_ic) {
+        setValue("doc_owner_ic", changedData.doc_owner_ic);
+      }
+      if (changedData.document_type) {
+        setValue("document_type", changedData.document_type);
+      }
     } catch (err) {
-      console.error("Upload failed", err);
+      console.error("Failed to update the document record", err);
 
       if (axios.isAxiosError(err)) {
-        const msg =
-        err.response?.data?.detail || "Failed to upload and process document.";
-        toast.error(msg);
+        if (err.response?.data.status === "soft_deleted_conflict") {
+          setPendingData(changedData);
+          setShowModal(true);
+        }
+
+        toast.error(err.response?.data.message);
       }
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const [hyphenError, setHyphenError] = useState("");
+  const confirmUpdate = async () => {
+    if (!pendingData) return;
 
- 
+    setIsLoading(true);
+
+    try {
+      await axiosClient.patch(
+        `/edit/${document.doc_encrypted_id}`,
+        {
+          ...pendingData,
+          status: "soft_delete_conflict",
+        },
+        {
+          params: { account_id: user?.id },
+        }
+      );
+
+      toast.success("Document record updated successfully.");
+      setShowModal(false);
+
+      if (pendingData.doc_owner_name)
+        setValue("doc_owner_name", pendingData.doc_owner_name);
+      if (pendingData.doc_owner_ic)
+        setValue("doc_owner_ic", pendingData.doc_owner_ic);
+      if (pendingData.document_type)
+        setValue("document_type", pendingData.document_type);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to override document conflict.");
+    } finally {
+      setIsLoading(false);
+      setPendingData(null);
+    }
+  };
+
+  const [hyphenError, setHyphenError] = useState("");
 
   useEffect(() => {
     if (!document) return;
@@ -84,7 +165,7 @@ export default function EditDocument(): React.ReactElement {
     if (document?.issuer_name) {
       setValue("issuer_name", document.issuer_name);
     }
-  
+
     if (document?.issuer_id) {
       setValue("issuer_id", document.issuer_id);
     }
@@ -96,9 +177,9 @@ export default function EditDocument(): React.ReactElement {
     if (document?.doc_owner_name) {
       setValue("doc_owner_name", document.doc_owner_name);
     }
-    
+
     if (document?.document_type) {
-      setValue("doc_type", document.document_type);
+      setValue("document_type", document.document_type);
     }
 
     if (document?.issue_date) {
@@ -107,6 +188,10 @@ export default function EditDocument(): React.ReactElement {
     }
   }, [document, setValue]);
 
+  const isSpecifiedFieldsModified = useMemo(() => {
+    const changed = getChangedFields();
+    return Object.keys(changed).length > 0;
+  }, [watchedValues[0], watchedValues[1], watchedValues[2], document]);
 
   return (
     <>
@@ -242,9 +327,9 @@ export default function EditDocument(): React.ReactElement {
                     </label>
                     <select
                       className={`${baseInputClass} block w-full ${
-                        errors.doc_type ? errorInputClass : ""
+                        errors.document_type ? errorInputClass : ""
                       }`}
-                      {...register("doc_type", {
+                      {...register("document_type", {
                         required: "Document type is required",
                       })}
                     >
@@ -255,9 +340,9 @@ export default function EditDocument(): React.ReactElement {
                         </option>
                       ))}
                     </select>
-                    {errors.doc_type && (
+                    {errors.document_type && (
                       <p className={`${errorTextClass}`}>
-                        {errors.doc_type.message}
+                        {errors.document_type.message}
                       </p>
                     )}
                   </div>
@@ -281,7 +366,7 @@ export default function EditDocument(): React.ReactElement {
                     className={`${unmodifiableInputClass}`}
                     {...register("issue_date")}
                   />
-                </div>              
+                </div>
               </div>
 
               <div className="mt-6 flex items-center justify-end gap-x-6">
@@ -292,21 +377,68 @@ export default function EditDocument(): React.ReactElement {
                   Cancel
                 </button>
                 <button
-                    type="submit"
-                    className={`px-4 py-2 rounded text-white ${
-                      isSpecifiedFieldsModified
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-gray-400 cursor-not-allowed"
-                    }`}
-                    disabled={!isSpecifiedFieldsModified}
-                  >
-                    Confirm
-                  </button>
+                  type="submit"
+                  className={`px-4 py-2 rounded text-white ${
+                    isSpecifiedFieldsModified
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                  disabled={!isSpecifiedFieldsModified}
+                >
+                  Confirm
+                </button>
               </div>
             </div>
           </div>
         </div>
       </form>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Confirm Override</h2>
+            <p className="mb-6">
+              <strong>
+                {pendingData?.doc_owner_ic
+                  ? pendingData?.doc_owner_ic
+                  : document.doc_owner_ic}
+              </strong>{" "}
+              already has{" "}
+              <strong>
+                {pendingData?.document_type
+                  ? pendingData?.document_type
+                  : document.document_type}
+              </strong>{" "}
+              exists in soft deleted state. Replacing this will permanently delete the soft-deleted document.
+              <span className="text-red-600 font-semibold">
+              {" "}This action cannot be undone
+              </span>
+              .
+              <br />
+              <br />
+              Are you sure you want to proceed?
+
+             
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUpdate}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded"
+                disabled={isLoading}
+              >
+                {isLoading ? "Replacing..." : "Proceed"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
