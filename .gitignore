@@ -121,12 +121,12 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+
 .venv
-env/
+
 venv/
-ENV/
-env.bak/
+
+
 venv.bak/
 
 # Spyder project settings
@@ -160,10 +160,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-backend/main.py
-backend/uploads/original/
-backend/uploads/with_qr/
-backend/keys/
-backend/crypto/
-backend/qr_implementation/
 
+frontend/node_modules/
