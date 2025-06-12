@@ -34,7 +34,7 @@ export default function EditDocumentIndex(): React.ReactElement {
           `/delete/${selectedDocument.doc_encrypted_id}`,
           {
             params: {
-              acc_id: user!.id,
+              account_id: user!.id,
             },
           }
         );

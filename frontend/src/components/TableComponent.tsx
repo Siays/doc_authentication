@@ -10,6 +10,10 @@ interface DocumentTableProps {
   total: number;
   onPageChange: (selected: number) => void;
   actions: (doc: DocumentRecord) => React.ReactNode;
+  customColumns?: {
+    label: string;
+    render: (doc: DocumentRecord) => React.ReactNode;
+  }[];
 }
 
 const TableComponent: React.FC<DocumentTableProps> = ({
@@ -19,12 +23,8 @@ const TableComponent: React.FC<DocumentTableProps> = ({
   total = 0,
   onPageChange,
   actions,
+  customColumns,
 }) => {
-  // const currentItems = useMemo(() => {
-  //   const start = currentPage * itemsPerPage;
-  //   return documents.slice(start, start + itemsPerPage);
-  // }, [currentPage, documents]);
-
   return (
     <>
       <div className="overflow-x-auto border rounded-md">
@@ -34,8 +34,18 @@ const TableComponent: React.FC<DocumentTableProps> = ({
               <th className="p-3 w-48">Doc Type</th>
               <th className="p-3 w-60">Owner Name</th>
               <th className="p-3 w-40">Owner IC</th>
-              <th className="p-3 w-40">Uploaded By</th>
-              <th className="p-3 w-50">Uploaded Time</th>
+              {customColumns ? (
+                customColumns.map((col, i) => (
+                  <th key={i} className="p-3 w-50">
+                    {col.label}
+                  </th>
+                ))
+              ) : (
+                <>
+                  <th className="p-3 w-40">Uploaded By</th>
+                  <th className="p-3 w-50">Uploaded Date</th>
+                </>
+              )}
               <th className="p-3 w-48 text-center">Action</th>
             </tr>
           </thead>
@@ -48,8 +58,18 @@ const TableComponent: React.FC<DocumentTableProps> = ({
                 <td className="p-3">{doc.document_type}</td>
                 <td className="p-3 ">{doc.doc_owner_name}</td>
                 <td className="p-3 ">{doc.doc_owner_ic}</td>
-                <td className="p-3 ">{doc.issuer_name}</td>
-                <td className="p-3 ">{doc.issue_date}</td>
+                {customColumns ? (
+                  customColumns.map((col, i) => (
+                    <td key={i} className="p-3">
+                      {col.render(doc)}
+                    </td>
+                  ))
+                ) : (
+                  <>
+                    <td className="p-3">{doc.issuer_name}</td>
+                    <td className="p-3">{doc.issue_date}</td>
+                  </>
+                )}
                 <td className="p-3 space-x-10">{actions(doc)}</td>
               </tr>
             ))}

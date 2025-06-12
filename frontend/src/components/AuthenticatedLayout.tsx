@@ -40,7 +40,10 @@ export default function AuthenticatedLayout() {
     { name: "New Document", to: "/new-document" },
     { name: "Edit Document", to: "/edit-document" },
     { name: "Authenticate Document", to: "/authenticate-document" },
-    ...(user?.is_super ? [{ name: "Create User", to: "/create-user" }] : []),
+    ...(user?.is_super ? [    
+      { name: "Recover Document", to: "/recover-document"},
+      { name: "Create User", to: "/create-user" }, 
+    ] : []),
   ];
 
   const { notifications, hasUnread, markAsRead, markAllAsRead } = useNotification();

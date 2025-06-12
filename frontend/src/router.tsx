@@ -14,6 +14,7 @@ import RequireAuth from "./components/RequireAuth";
 import ModifyUserPage from "./pages/ModifyUserPage";
 import RootRedirect from "./components/RootRedirect";
 import EditDocument from "./pages/EditPages/EditDocument";
+import RecoverDocument from "./pages/RecoverDocument";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +71,14 @@ const router = createBrowserRouter([
       {
         path: "authenticate-document/upload/:doc_encrypted_id",
         element: <AuthenticateUploadPage />,
+      },
+      {
+        path: "recover-document", // accesible only by super user
+        element: (
+          <RequireSuperUser>
+            <RecoverDocument />
+          </RequireSuperUser>
+        ),
       },
       {
         path: "create-user", // accesible only by super user

@@ -1,70 +1,68 @@
-import { type DocumentRecord } from '../types/sharedInterface'
-import { MdSearch } from "react-icons/md";
-import React, { useState } from "react";
-import axiosClient from "../services/axiosClient";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../services/axiosClient";
 import { toast } from "react-toastify";
-import TableComponent from "../components/TableComponent";
+import { useAuth } from "../hooks/useAuth";
 import { usePageTitles } from "../hooks/usePageTitle";
+import axios, { isAxiosError } from "axios";
+import { MdSearch } from "react-icons/md";
+import TableComponent from "../components/TableComponent";
+import { type DocumentRecord } from "../types/sharedInterface";
 
-interface IndexesLayoutProps {
-  title: string;
-  tabTitle: string;
-  actionRender: (doc: DocumentRecord, refreshDocuments?: () => void) => React.ReactNode;
-}
-
-const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRender }) => {
-    usePageTitles(title, tabTitle);
+export default function RecoverDocument(): React.ReactElement {
+    usePageTitles("Recover Document", "Recover Document Page");
+    const { user } = useAuth();
+    const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
     const navigate = useNavigate();
     const [docOwnerIC, setDocOwnerIC] = useState("");
     const [docType, setDocType] = useState("");
     const [documents, setDocuments] = useState<DocumentRecord[]>([]);
     const [icError, setIcError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-  
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 10;
   
+    const toggleSelect = (id: string) => {
+      setSelectedDocs((prev) =>
+        prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id]
+      );
+      console.log(selectedDocs);
+    };
+
     const isValidIC = (ic: string) => {
       return /^\d{6}-\d{2}-\d{4}$/.test(ic);
     };
   
-    const fetchDocList = async (page = currentPage) => {
-      if (!isValidIC(docOwnerIC)) return;
-    
+    const fetchDocList = async (page = currentPage) => {    
       setIsLoading(true);
       try {
-        const response = await axiosClient.get("/get-document", {
-          params: {
-            owner_ic: docOwnerIC,
-            doc_type: docType,
-            page: page,
-            limit: itemsPerPage,
+        const response = await axiosClient.get("/get-soft-deleted-document", {
+          params: { 
+            owner_ic: docOwnerIC || "", 
+            doc_type: docType || "",
+            page: page, 
+            limit: itemsPerPage
           },
         });
-    
+
         const { documents: fetchedDocs, total: fetchedTotal } = response.data;
-    
-        if (fetchedTotal === 0) {
-          setDocuments([]);
-          setTotal(0);
-          setCurrentPage(0);
-          return;
-        }
-    
+        
+        // Check if current page is empty but there are documents available
         if (fetchedDocs.length === 0 && fetchedTotal > 0 && page > 0) {
+          // Calculate the last valid page (0-indexed)
           const lastValidPage = Math.max(0, Math.ceil(fetchedTotal / itemsPerPage) - 1);
-          const fallbackResponse = await axiosClient.get("/get-document", {
-            params: {
-              owner_ic: docOwnerIC,
-              doc_type: docType,
-              page: lastValidPage,
-              limit: itemsPerPage,
+          
+          // Fetch the last valid page instead
+          const fallbackResponse = await axiosClient.get("/get-soft-deleted-document", {
+            params: { 
+              owner_ic: docOwnerIC || "", 
+              doc_type: docType || "",
+              page: lastValidPage, 
+              limit: itemsPerPage
             },
           });
-    
+          
           setDocuments(fallbackResponse.data.documents);
           setTotal(fallbackResponse.data.total);
           setCurrentPage(lastValidPage);
@@ -79,21 +77,39 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
           const msg = err.response?.data?.detail || "Failed to fetch documents.";
           toast.error(msg);
         } else {
-          toast.error("Unexpected error occurred.");
+          toast.error("An unexpected error occurred.");
         }
-
-        setDocuments([]);
-        setTotal(0);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    
 
-    const refreshDocuments = () => { 
-      fetchDocList();     
-    };
+    const confirmRecover = async () => {
+      setIsLoading(true);
+      try{
+        const response = await axiosClient.post("/recover-documents", {
+            encrypted_doc_ids: selectedDocs,  
+            account_id: String(user?.id),      
+        })
+        toast.success(response.data.message);
+        
+        setSelectedDocs([]);
+        fetchDocList(0);
+      }catch(err){
+        console.log(err);
+        
+        if (axios.isAxiosError(err)){
+          toast.error(err.response?.data?.detail || "Unknown error");
+        }
+        
+      }finally{
+        setIsLoading(false);
+      }
+    }
+
+    useEffect(() => {
+      fetchDocList(0);
+    }, [])
   
     return (
       <>
@@ -200,7 +216,7 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
           </div>
   
           {/* Table */}
-          {documents.length > 0 ? (
+          {documents.length > 0 && (
             <TableComponent
               documents={documents}
               currentPage={currentPage}
@@ -209,23 +225,57 @@ const IndexesLayout: React.FC<IndexesLayoutProps> = ({ title, tabTitle, actionRe
                 setCurrentPage(page);
                 fetchDocList(page);
               }}
-              actions={(doc) => actionRender(doc, refreshDocuments)}
+              actions={(doc) => (
+                <div className="flex justify-center items-center h-full">
+                <input
+                type="checkbox"
+                checked={selectedDocs.includes(doc.doc_encrypted_id)}
+                onChange={() => toggleSelect(doc.doc_encrypted_id)}
+                
+              />
+              </div>
+              )}
               total={total}
-            />) :( <p className="text-center text-gray-500 mt-8">No documents found.</p>
+              customColumns={[
+                {
+                  label: "Deleted By",
+                  render: (doc) => doc.deleted_by_name || "-",
+                },
+                {
+                  label: "Deleted Date",
+                  render: (doc) => {
+                    if (!doc.deleted_at) return "-";
+                    const date = new Date(doc.deleted_at);
+                    return new Intl.DateTimeFormat("en-MY", {
+                      dateStyle: "medium",
+                    }).format(date);
+                  },
+                },
+              ]}
+            />
           )}
   
           {/* Back button */}
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex gap-x-6 justify-end">
             <button
-              className="px-6 py-2 bg-white border border-gray-400 rounded hover:bg-gray-100"
+              className="px-4 py-2 bg-white border border-gray-400 rounded hover:bg-gray-100"
               onClick={() => navigate("/home-page")}
             >
               Back To Home
+            </button>
+
+            <button
+              disabled = {selectedDocs.length == 0}
+              onClick={confirmRecover}
+              className={`${
+                selectedDocs.length == 0 ? "rounded text-white px-4 py-2 bg-gray-400 cursor-not-allowed"
+                 : "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              }`}
+            >
+              Recover
             </button>
           </div>
         </div>
       </>
     );
 }
-
-export default IndexesLayout
