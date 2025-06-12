@@ -8,4 +8,8 @@ export interface DocumentRecord {
     issuer_name: string;
     issue_date: string;
     verification_url: string;
+    is_deleted: boolean;
+    deleted_by: string;
+    deleted_by_name: string;
+    deleted_at: string;
   }
