@@ -166,4 +166,4 @@ backend/uploads/with_qr/
 backend/keys/
 backend/crypto/
 backend/qr_implementation/
-
+node_modules
