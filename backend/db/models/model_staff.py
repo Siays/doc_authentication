@@ -21,6 +21,6 @@ class Staff(Base):
     is_active = Column(Boolean, default=True)
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         """Get staff member's full name."""
         return f"{self.first_name} {self.last_name}"

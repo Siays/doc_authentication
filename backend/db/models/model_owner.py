@@ -24,6 +24,6 @@ class Owner(Base):
     nationality = Column(String(30), nullable=False)
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         """Get staff member's full name."""
         return f"{self.first_name} {self.last_name}"

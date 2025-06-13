@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+from db.models.model_owner import Owner
 from db.models.model_staff_system_acc import StaffSystemAcc
 
 
@@ -10,7 +11,6 @@ def get_full_name_by_account_id(db: Session, account_id: str) -> str:
 
     acc_details = (
         db.query(StaffSystemAcc)
-        .options(joinedload(StaffSystemAcc.staff))
         .filter(StaffSystemAcc.account_id == account_id)
         .first()
     )
@@ -19,3 +19,14 @@ def get_full_name_by_account_id(db: Session, account_id: str) -> str:
         raise ValueError("Staff account not found.")
 
     return acc_details.staff.full_name
+
+
+def get_owner_full_name(db: Session, ic_no: str) -> str:
+    owner_details = db.query(Owner).filter(Owner.owner_ic_no == ic_no).first()
+
+    if not owner_details:
+        raise ValueError("Owner not found.")
+
+    return owner_details.full_name
+
+
