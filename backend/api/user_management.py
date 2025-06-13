@@ -1,7 +1,9 @@
 from typing import Optional
-from fastapi import APIRouter, Form, Depends, File
+from fastapi import APIRouter, Form, Depends, File, HTTPException
 from datetime import datetime
 from sqlalchemy.orm import Session
+
+from db.case_specified_crud import get_owner_full_name
 from db.database import get_db
 from password_processor import pw_processor
 from db.models.model_staff_system_acc import StaffSystemAcc
@@ -82,7 +84,6 @@ def get_staff_info(email: str, db: Session = Depends(get_db)):
 def update_acc(email: str = Form(...),
                password: str = Form(None),
                profile_picture: Optional[UploadFile] = File(None),
-
                db: Session = Depends(get_db)):
 
     user = get_by_column(db, StaffSystemAcc, "email", email)
@@ -124,3 +125,12 @@ def profile_pic_processing(file: UploadFile, acc_id: int) -> str:
         buffer.write(file.file.read())
 
     return f"/profile-pics/{filename}"
+
+
+@router.get("/get-owner-name")
+def get_owner_name(doc_owner_ic: str, db: Session = Depends(get_db)):
+    try:
+        name = get_owner_full_name(db, doc_owner_ic)
+        return {"name": name}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

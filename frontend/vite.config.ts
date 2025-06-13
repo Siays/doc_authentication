@@ -6,9 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig(({ mode }) => {
 
   const env = loadEnv(mode, process.cwd());
-
   const baseURL = env.VITE_FAST_API_BASE_URL;
-  // const wsURL = env.VITE_WEBSOCKET_URL;
 
   return { 
     plugins: [react(),
@@ -16,7 +14,7 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       host: env.VITE_LOCAL_HOST,      
-      port: env.VITE_LOCAL_HOST_PORT,   
+      port: Number(env.VITE_LOCAL_HOST_PORT),   
       strictPort: true ,
       open: '/',
       proxy: {

@@ -40,10 +40,28 @@ export default function NewDocument(): React.ReactElement {
     handleSubmit,
     trigger,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>({
     mode: "onTouched",
   });
+
+  const getOwnerName = async (ic: string) => {
+    setIsLoading(true);
+    try{
+      const response = await axiosClient.get("/get-owner-name", {
+        params: {"doc_owner_ic": ic},
+      });
+      setValue("doc_owner_name", response.data.name)
+    }catch(err){
+      if(axios.isAxiosError(err)){
+        const msg = err.response?.data.detail || "Error retriving document owner name.";
+        toast.error(msg);
+      }
+    }finally{
+      setIsLoading(false);
+    }
+  }
 
   const onSubmit = async (data: FormValues) => {
     const formData = new FormData();
@@ -113,6 +131,16 @@ export default function NewDocument(): React.ReactElement {
     };
   }, [downloadUrl]);
 
+  useEffect(() => {
+    register("pdf", {
+      required: "PDF file is required",
+      validate: (file) => {
+        return file instanceof File || "Invalid file";
+      },
+    });
+  }, [register]);
+  
+
   return (
     <>
       {/* spinner while fetching data from the db */}
@@ -157,6 +185,8 @@ export default function NewDocument(): React.ReactElement {
                   </label>
                   <input
                     type="text"
+                    readOnly
+                    className={`${unmodifiableInputClass}`}
                     {...register("doc_owner_name", {
                       required: "Document owner name is required",
                       pattern: {
@@ -164,14 +194,7 @@ export default function NewDocument(): React.ReactElement {
                         message: "Name must contain only letters and spaces",
                       },
                     })}
-                    className={`${baseInputClass} block w-full  
-                ${errors.doc_owner_name ? `${errorInputClass}` : ""}`}
                   />
-                  {errors.doc_owner_name && (
-                    <p className={`${errorTextClass}`}>
-                      {errors.doc_owner_name.message}
-                    </p>
-                  )}
                 </div>
 
                 <div className="flex space-x-4">
@@ -217,9 +240,15 @@ export default function NewDocument(): React.ReactElement {
                           shouldValidate: false,
                         });
                       }}
-                      onBlur={() => {
+                      onBlur={async() => {
                         setHyphenError("");
-                        trigger("doc_owner_ic");
+                        const isValid = trigger("doc_owner_ic");
+                        if (!isValid) return;
+
+                        const ic = getValues("doc_owner_ic");
+                        if (ic) {
+                          await getOwnerName(ic);
+                        }
                       }}
                       className={`${baseInputClass} block w-full ${
                         errors.doc_owner_ic || hyphenError
@@ -289,19 +318,21 @@ export default function NewDocument(): React.ReactElement {
                 </div>
 
                 <div>
-                  <label className="block mb-1 font-medium">
-                    Upload Document
-                  </label>
-                  <DropzoneUploader
-                    onFileSelect={(selectedFile) => {
-                      setFile(selectedFile);
-                      setValue("pdf", selectedFile, { shouldValidate: true });
-                      trigger("pdf");
-                    }}
-                    fileType={{ "application/pdf": [".pdf"] }}
-                    message="Only PDF, max 1 file, cannot be empty"
-                  />
-                </div>
+  <label className="block mb-1 font-medium">Upload Document</label>
+  <DropzoneUploader
+    onFileSelect={(selectedFile) => {
+      setFile(selectedFile);
+      setValue("pdf", selectedFile, { shouldValidate: true });
+      trigger("pdf");
+    }}
+    fileType={{ "application/pdf": [".pdf"] }}
+    message="Only PDF, max 1 file, cannot be empty"
+  />
+  {errors.pdf && (
+    <p className={errorTextClass}>{errors.pdf.message}</p>
+  )}
+</div>
+
 
                 {downloadUrl && (
                   <a
