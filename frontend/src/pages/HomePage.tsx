@@ -85,7 +85,7 @@ export default function HomePage() {
                   <th className="p-3">Owner Name</th>
                   <th className="p-3">Owner IC</th>
                   <th className="p-3">Uploaded By</th>
-                  <th className="p-3">Uploaded Time</th>
+                  <th className="p-3">Uploaded Date</th>
                   <th className="p-3">Action</th>
                 </tr>
               </thead>
