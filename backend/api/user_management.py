@@ -127,9 +127,11 @@ def profile_pic_processing(file: UploadFile, acc_id: int) -> str:
     return f"/profile-pics/{filename}"
 
 
-@router.get("/get-owner-name")
-def get_owner_name(doc_owner_ic: str, db: Session = Depends(get_db)):
+@router.get("/check-ic-exist")
+def check_ic_exist(doc_owner_ic: str, db: Session = Depends(get_db)):
     try:
+        # since we rely on IC to retrieve the owner name,
+        # thus if the IC is not exist, then we cant get the owner name
         name = get_owner_full_name(db, doc_owner_ic)
         return {"name": name}
     except ValueError as e:

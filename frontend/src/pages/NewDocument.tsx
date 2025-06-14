@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { usePageTitles } from "../hooks/usePageTitle";
 import DropzoneUploader from "../components/DropzoneUploader";
 import { useAuth } from "../hooks/useAuth";
@@ -34,6 +34,7 @@ export default function NewDocument(): React.ReactElement {
   const docType = ["IC", "BRG_PENGESAHAN_BRN"];
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [inputtedIC, setInputtedIC] = useState<string | null>(null);
 
   const {
     register,
@@ -41,29 +42,45 @@ export default function NewDocument(): React.ReactElement {
     trigger,
     setValue,
     getValues,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<FormValues>({
     mode: "onTouched",
   });
 
   const getOwnerName = async (ic: string) => {
     setIsLoading(true);
-    try{
-      const response = await axiosClient.get("/get-owner-name", {
-        params: {"doc_owner_ic": ic},
+    try {
+      const response = await axiosClient.get("/check-ic-exist", {
+        params: { doc_owner_ic: ic },
       });
-      setValue("doc_owner_name", response.data.name)
-    }catch(err){
-      if(axios.isAxiosError(err)){
-        const msg = err.response?.data.detail || "Error retriving document owner name.";
+      setValue("doc_owner_name", response.data.name);
+      setInputtedIC(ic);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const msg =
+          err.response?.data.detail || "Error retriving document owner name.";
         toast.error(msg);
       }
-    }finally{
+      setValue("doc_owner_name", "");
+      setInputtedIC(null);
+    } finally {
+      await trigger("doc_owner_ic");
       setIsLoading(false);
     }
-  }
+  };
 
   const onSubmit = async (data: FormValues) => {
+    const currentIC = data.doc_owner_ic;
+    // if user change the input ic before submission
+    // safeguard the case which change valid ic to invalid ic
+    // before submission
+    if (currentIC !== inputtedIC) {
+      setValue("doc_owner_name", "");
+      toast.error(
+        "Current IC inputted doesn't match with last valid IC inputted."
+      );
+    }
+
     const formData = new FormData();
     formData.append("doc_owner_name", data.doc_owner_name);
     formData.append("doc_owner_ic", data.doc_owner_ic);
@@ -78,7 +95,7 @@ export default function NewDocument(): React.ReactElement {
       const response = await axiosClient.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      
+
       setDownloadUrl(response.data.download_url);
       toast.success("File successfully processed. Ready for download.");
     } catch (err) {
@@ -86,10 +103,11 @@ export default function NewDocument(): React.ReactElement {
 
       if (axios.isAxiosError(err)) {
         const msg =
-        err.response?.data?.detail || "Failed to upload and process document.";
+          err.response?.data?.detail ||
+          "Failed to upload and process document.";
         toast.error(msg);
       }
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -139,7 +157,6 @@ export default function NewDocument(): React.ReactElement {
       },
     });
   }, [register]);
-  
 
   return (
     <>
@@ -219,12 +236,12 @@ export default function NewDocument(): React.ReactElement {
                         let value = e.target.value;
 
                         // Manual hyphen error detection (runs while typing)
-                        if (value.length === 7 && value[6] !== "-") {
+                        if (value.length >= 7 && value[6] !== "-") {
                           setHyphenError(
                             "First hyphen should be after 6 digits (e.g. 123456-)"
                           );
                           value = value.slice(0, 6);
-                        } else if (value.length === 10 && value[9] !== "-") {
+                        } else if (value.length >= 10 && value[9] !== "-") {
                           setHyphenError(
                             "Second hyphen should be after 2 digits (e.g. 123456-78-)"
                           );
@@ -239,16 +256,21 @@ export default function NewDocument(): React.ReactElement {
                         setValue("doc_owner_ic", value, {
                           shouldValidate: false,
                         });
-                      }}
-                      onBlur={async() => {
-                        setHyphenError("");
-                        const isValid = trigger("doc_owner_ic");
-                        if (!isValid) return;
 
-                        const ic = getValues("doc_owner_ic");
-                        if (ic) {
-                          await getOwnerName(ic);
+                        // instead of rely on onBlur, we directly try to fetch the owner name
+                        // upon the valid format of IC is inputted.
+                        if (value.length == 14){
+                          getOwnerName(value);
+                        }else{
+                          setValue("doc_owner_name", "");
+                          setInputtedIC(null);
                         }
+
+                      }}
+                      onBlur={async () => {
+                        setHyphenError("");
+                        const isValid = await trigger("doc_owner_ic");
+                        if (!isValid) return;    
                       }}
                       className={`${baseInputClass} block w-full ${
                         errors.doc_owner_ic || hyphenError
@@ -318,21 +340,22 @@ export default function NewDocument(): React.ReactElement {
                 </div>
 
                 <div>
-  <label className="block mb-1 font-medium">Upload Document</label>
-  <DropzoneUploader
-    onFileSelect={(selectedFile) => {
-      setFile(selectedFile);
-      setValue("pdf", selectedFile, { shouldValidate: true });
-      trigger("pdf");
-    }}
-    fileType={{ "application/pdf": [".pdf"] }}
-    message="Only PDF, max 1 file, cannot be empty"
-  />
-  {errors.pdf && (
-    <p className={errorTextClass}>{errors.pdf.message}</p>
-  )}
-</div>
-
+                  <label className="block mb-1 font-medium">
+                    Upload Document
+                  </label>
+                  <DropzoneUploader
+                    onFileSelect={(selectedFile) => {
+                      setFile(selectedFile);
+                      setValue("pdf", selectedFile, { shouldValidate: true });
+                      trigger("pdf");
+                    }}
+                    fileType={{ "application/pdf": [".pdf"] }}
+                    message="Only PDF, max 1 file, cannot be empty"
+                  />
+                  {errors.pdf && (
+                    <p className={errorTextClass}>{errors.pdf.message}</p>
+                  )}
+                </div>
 
                 {downloadUrl && (
                   <a
@@ -357,7 +380,14 @@ export default function NewDocument(): React.ReactElement {
                 >
                   Cancel
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  disabled={!inputtedIC || !isValid}
+                  className={`px-4 py-2 rounded text-white ${
+                    inputtedIC && isValid
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                >
                   Confirm
                 </button>
               </div>

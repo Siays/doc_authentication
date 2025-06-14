@@ -49,11 +49,34 @@ export default function EditDocument(): React.ReactElement {
   const [pendingData, setPendingData] = useState<Partial<FormValues> | null>(
     null
   );
+  const [inputtedIC, setInputtedIC] = useState<string | null>(null);
   const watchedValues = watch([
     "doc_owner_name",
     "doc_owner_ic",
     "document_type",
   ]);
+
+  const getOwnerName = async (ic: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axiosClient.get("/check-ic-exist", {
+        params: { doc_owner_ic: ic },
+      });
+      setValue("doc_owner_name", response.data.name);
+      setInputtedIC(ic);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const msg =
+          err.response?.data.detail || "Error retriving document owner name.";
+        toast.error(msg);
+      }
+      setValue("doc_owner_name", "");
+      setInputtedIC(null);
+    } finally {
+      await trigger("doc_owner_ic");
+      setIsLoading(false);
+    }
+  };
 
   const getChangedFields = () => {
     const currentValues = getValues();
@@ -78,7 +101,47 @@ export default function EditDocument(): React.ReactElement {
   };
 
   const onSubmit = async () => {
-    const changedData = getChangedFields();
+    // in case we need to change the data
+    let changedData = getChangedFields();
+     
+    if (changedData.doc_owner_ic){
+      const currentIC = changedData.doc_owner_ic;
+      // if user change the input ic before submission
+      // safeguard the case which change valid ic to invalid ic
+      // before submission
+      if (currentIC !== inputtedIC) {
+        setValue("doc_owner_name", "");
+        toast.error(
+          "Current IC inputted doesn't match with last valid IC inputted."
+        );
+      }
+    }
+
+    if (changedData.doc_owner_ic && !changedData.doc_owner_name) {
+      try {
+        const response = await axiosClient.get("/get-owner-name", {
+          params: { doc_owner_ic: changedData.doc_owner_ic },
+        });
+
+        const fetchedName = response.data.name;
+        if (fetchedName) {
+          changedData.doc_owner_name = fetchedName;
+          setValue("doc_owner_name", fetchedName); // Optional: Update UI field
+        } else {
+          toast.error("Could not fetch owner name for the new IC.");
+          return; // Abort if no name found
+        }
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          const msg =
+            err.response?.data.detail || "Failed to fetch owner name.";
+          toast.error(msg);
+        } else {
+          toast.error("Unexpected error while fetching owner name.");
+        }
+        return; // Abort submission
+      }
+    }
 
     try {
       setIsLoading(true);
@@ -190,6 +253,15 @@ export default function EditDocument(): React.ReactElement {
 
   const isSpecifiedFieldsModified = useMemo(() => {
     const changed = getChangedFields();
+
+    const icChanged = "doc_owner_ic" in changed;
+
+    // if IC is changed and doc_owner_name is empty or undefined,
+    // happen when invalid IC / inexist IC in db
+    if (icChanged && !getValues("doc_owner_name")){
+      return false;
+    }
+
     return Object.keys(changed).length > 0;
   }, [watchedValues[0], watchedValues[1], watchedValues[2], document]);
 
@@ -237,21 +309,10 @@ export default function EditDocument(): React.ReactElement {
                   </label>
                   <input
                     type="text"
-                    {...register("doc_owner_name", {
-                      required: "Document owner name is required",
-                      pattern: {
-                        value: /^[A-Za-z\s]+$/,
-                        message: "Name must contain only letters and spaces",
-                      },
-                    })}
-                    className={`${baseInputClass} block w-full  
-                ${errors.doc_owner_name ? `${errorInputClass}` : ""}`}
+                    readOnly
+                    className={`${unmodifiableInputClass}`}
+                    {...register("doc_owner_name")}
                   />
-                  {errors.doc_owner_name && (
-                    <p className={`${errorTextClass}`}>
-                      {errors.doc_owner_name.message}
-                    </p>
-                  )}
                 </div>
 
                 <div className="flex space-x-4">
@@ -276,12 +337,12 @@ export default function EditDocument(): React.ReactElement {
                         let value = e.target.value;
 
                         // Manual hyphen error detection (runs while typing)
-                        if (value.length === 7 && value[6] !== "-") {
+                        if (value.length >= 7 && value[6] !== "-") {
                           setHyphenError(
                             "First hyphen should be after 6 digits (e.g. 123456-)"
                           );
                           value = value.slice(0, 6);
-                        } else if (value.length === 10 && value[9] !== "-") {
+                        } else if (value.length >= 10 && value[9] !== "-") {
                           setHyphenError(
                             "Second hyphen should be after 2 digits (e.g. 123456-78-)"
                           );
@@ -296,10 +357,23 @@ export default function EditDocument(): React.ReactElement {
                         setValue("doc_owner_ic", value, {
                           shouldValidate: false,
                         });
+
+                        if (value.length == 14){
+                          getOwnerName(value);
+                        }else{
+                          setValue("doc_owner_name", "");
+                          setInputtedIC(null);
+                        }
                       }}
-                      onBlur={() => {
+                      onBlur={async () => {
                         setHyphenError("");
-                        trigger("doc_owner_ic");
+                        const isValid = trigger("doc_owner_ic");
+                        if (!isValid) return;
+
+                        const ic = getValues("doc_owner_ic");
+                        if (ic) {
+                          await getOwnerName(ic);
+                        }
                       }}
                       className={`${baseInputClass} block w-full ${
                         errors.doc_owner_ic || hyphenError
@@ -409,16 +483,16 @@ export default function EditDocument(): React.ReactElement {
                   ? pendingData?.document_type
                   : document.document_type}
               </strong>{" "}
-              exists in soft deleted state. Replacing this will permanently delete the soft-deleted document.
+              exists in soft deleted state. Replacing this will permanently
+              delete the soft-deleted document.
               <span className="text-red-600 font-semibold">
-              {" "}This action cannot be undone
+                {" "}
+                This action cannot be undone
               </span>
               .
               <br />
               <br />
               Are you sure you want to proceed?
-
-             
             </p>
             <div className="flex justify-end space-x-4">
               <button

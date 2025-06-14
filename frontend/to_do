@@ -1,3 +1,7 @@
+on first attempt , the owner name is set to empty, however on second attemp onward, on clicking the button(have not change ic yet) no response, why?
+- currently working on new document, edit doc has similar thing to do
+
+
 1. soft deleted document recovery
 2. deleted log (unable to recover), happen upon: replaced, in soft_deleted status >predefined duration
 

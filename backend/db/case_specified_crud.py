@@ -25,7 +25,7 @@ def get_owner_full_name(db: Session, ic_no: str) -> str:
     owner_details = db.query(Owner).filter(Owner.owner_ic_no == ic_no).first()
 
     if not owner_details:
-        raise ValueError("Owner not found.")
+        raise ValueError("Provided IC does not exist in owner records.")
 
     return owner_details.full_name
 
